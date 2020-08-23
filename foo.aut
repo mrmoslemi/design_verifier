@@ -1,0 +1,18 @@
+never  {    /* []true */
+accept_init:
+T0_init:
+	do
+	:: atomic { (1) -> assert(!(1)) }
+	od;
+accept_all:
+	skip
+}
+never  {    /* []true */
+accept_init:
+T0_init:
+	do
+	:: atomic { (1) -> assert(!(1)) }
+	od;
+accept_all:
+	skip
+}
