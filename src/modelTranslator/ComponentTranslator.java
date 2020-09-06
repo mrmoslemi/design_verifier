@@ -46,17 +46,22 @@ public class ComponentTranslator {
 		HashMap<String, ArrayList<String>> toWrite = new HashMap<>();
 
 		for (Transition transition : transitions) {
-			Pair<String, String> result = TransitionTranslator.translate(transition);
-			ArrayList<String> arrayList = toWrite.getOrDefault(result.first, new ArrayList<>());
-			arrayList.add(result.second);
-			toWrite.put(result.first, arrayList);
-		}
-		for (Parameter parameter : component.getOutputParameters()) {
-			for (Transition transition : parameter.getTransitions()) {
+			if (transition.getType().equals(Transition.Type.SYNC)) {
 				Pair<String, String> result = TransitionTranslator.translate(transition);
 				ArrayList<String> arrayList = toWrite.getOrDefault(result.first, new ArrayList<>());
 				arrayList.add(result.second);
 				toWrite.put(result.first, arrayList);
+			}
+		}
+		for (Parameter parameter : component.getOutputParameters()) {
+			for (Transition transition : parameter.getTransitions()) {
+				if (transition.getType().equals(Transition.Type.SYNC)) {
+					Pair<String, String> result = TransitionTranslator.translate(transition);
+					ArrayList<String> arrayList = toWrite.getOrDefault(result.first, new ArrayList<>());
+					arrayList.add(result.second);
+					toWrite.put(result.first, arrayList);
+				}
+
 			}
 		}
 		for (String key : toWrite.keySet()) {

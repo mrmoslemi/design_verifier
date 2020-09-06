@@ -64,7 +64,10 @@ public class TransitionTranslator {
             trigger = channelMame + "?" + stateName + ";";
         }
 
-        modelGenerator.append(":: ");
+		modelGenerator.append("\\* ");
+		modelGenerator.append(transition.getId());
+		modelGenerator.append("*\\\n");
+		modelGenerator.append(":: ");
         modelGenerator.append(preCondition);
         modelGenerator.append(" -> ");
         for (String assignment : assignments) {

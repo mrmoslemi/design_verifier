@@ -78,6 +78,9 @@ public class Transition {
         return this.postConditions;
     }
 
+    public String getId(){
+    	return this.id;
+	}
     @NotNull
     public Type getType() {
         return this.type;
