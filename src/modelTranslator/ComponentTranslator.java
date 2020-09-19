@@ -1,9 +1,6 @@
 package modelTranslator;
 
-import model.Component;
-import model.Parameter;
-import model.Transition;
-import utils.Pair;
+import model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,11 +12,14 @@ public class ComponentTranslator {
 
 	public static String translate(Component component) {
 		StringBuilder modelBuilder = new StringBuilder();
+
 		modelBuilder.append("#define N 12\n\n");
+
 		for (Parameter parameter : component.getParameters()) {
-			modelBuilder.append(ParameterTranslator.getStatesDefinition(parameter));
-			modelBuilder.append(ParameterTranslator.getChannelDefinition(parameter));
-			modelBuilder.append("\n");
+			modelBuilder.append(ParameterTranslator.translate(parameter));
+		}
+		for (Channel channel : component.getChannels()) {
+			modelBuilder.append(ChannelTranslator.translate(channel));
 		}
 
 		modelBuilder.append("\n\nactive proctype ");
@@ -41,44 +41,28 @@ public class ComponentTranslator {
 				modelBuilder.append(";\n");
 			}
 		}
-		ArrayList<Transition> transitions = component.getTransitions();
 		modelBuilder.append("\tdo\n");
-		HashMap<String, ArrayList<String>> toWrite = new HashMap<>();
-
-		for (Transition transition : transitions) {
-			if (transition.getType().equals(Transition.Type.SYNC)) {
-				Pair<String, String> result = TransitionTranslator.translate(transition);
-				ArrayList<String> arrayList = toWrite.getOrDefault(result.first, new ArrayList<>());
-				arrayList.add(result.second);
-				toWrite.put(result.first, arrayList);
-			}
+		ArrayList<Action> actions = component.getInputActions();
+		HashMap<Action, ArrayList<Transition>> body = new HashMap<>();
+		for (Action action : actions) {
+			body.put(action, new ArrayList<>());
 		}
-		for (Parameter parameter : component.getOutputParameters()) {
-			for (Transition transition : parameter.getTransitions()) {
-				if (transition.getType().equals(Transition.Type.SYNC)) {
-					Pair<String, String> result = TransitionTranslator.translate(transition);
-					ArrayList<String> arrayList = toWrite.getOrDefault(result.first, new ArrayList<>());
-					arrayList.add(result.second);
-					toWrite.put(result.first, arrayList);
+		for (Transition transition : component.getTransitions()) {
+			body.get(transition.getTrigger()).add(transition);
+		}
+		for (Action action : actions) {
+			modelBuilder.append("\n\n\t// TRIGGER\n");
+			modelBuilder.append("\t:: ").append(action).append(";\n");
+			ArrayList<Transition> transitions = body.get(action);
+			if (!transitions.isEmpty()) {
+				modelBuilder.append("\t\tif\n");
+				for (Transition transition : transitions) {
+					modelBuilder.append("\t\t// TRANSITION ").append(transition.getId()).append("\n");
+					modelBuilder.append("\t\t:: ").append(transition).append("\n");
 				}
-
+				modelBuilder.append("\t\tfi;\n");
 			}
 		}
-		for (String key : toWrite.keySet()) {
-			ArrayList<String> arrayList = toWrite.get(key);
-			modelBuilder.append("\t::");
-			if (key != null) {
-				modelBuilder.append(key);
-			}
-			modelBuilder.append("\n");
-			modelBuilder.append("\t\tif\n");
-			for (String item : arrayList) {
-				modelBuilder.append("\t\t");
-				modelBuilder.append(item);
-			}
-			modelBuilder.append("\t\tfi;\n");
-		}
-
 		modelBuilder.append("\tod;\n");
 		modelBuilder.append("};\n\n");
 		return modelBuilder.toString();
@@ -88,7 +72,7 @@ public class ComponentTranslator {
 	public static ArrayList<String> getInputInterfaceAlphabet(Component component) {
 		ArrayList<String> actions = new ArrayList<>();
 		for (Parameter parameter : component.getInputParameters()) {
-			actions.addAll(ParameterTranslator.getReadActions(parameter));
+//			actions.addAll(ParameterTranslator.getReadActions(parameter));
 		}
 		return actions;
 	}
@@ -96,7 +80,7 @@ public class ComponentTranslator {
 	public static ArrayList<String> getOutputInterfaceAlphabet(Component component) {
 		ArrayList<String> actions = new ArrayList<>();
 		for (Parameter parameter : component.getOutputParameters()) {
-			actions.addAll(ParameterTranslator.getWriteActions(parameter));
+//			actions.addAll(ParameterTranslator.getWriteActions(parameter));
 		}
 		return actions;
 	}

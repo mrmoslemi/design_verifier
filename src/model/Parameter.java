@@ -2,26 +2,29 @@ package model;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import utils.IntegerParser;
+import utils.RegexChecker;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Parameter implements TransitionContainer {
+public class Parameter {
 	private String name;
-	private Set<String> states;
+	private Set<State> states;
 	private ValueRange valueRange;
 	private Evaluation initial;
-	private ArrayList<Transition> transitions;
+	private Channel inputChannel, outputChannel;
 
 	public Parameter(@NotNull String name) {
 		this.name = name;
 		this.states = new HashSet<>();
-		this.transitions = new ArrayList<>();
+		this.inputChannel = new Channel(this, Channel.Type.in);
+		this.outputChannel = new Channel(this, Channel.Type.out);
 	}
 
 	public void addState(String state) {
-		this.states.add(state);
+		this.states.add(new State(this, state));
 	}
 
 	public void setValueRange(ValueRange valueRange) {
@@ -30,16 +33,10 @@ public class Parameter implements TransitionContainer {
 
 
 	public void setInitial(Evaluation initial) {
-		this.states.add(initial.getState());
 		this.initial = initial;
 
 	}
 
-	public void addTransition(Transition transition) {
-		this.transitions.add(transition);
-	}
-
-	@Override
 	public ArrayList<Parameter> getParameters() {
 		ArrayList<Parameter> toReturn = new ArrayList<>();
 		toReturn.add(this);
@@ -51,7 +48,7 @@ public class Parameter implements TransitionContainer {
 	}
 
 
-	public Set<String> getStates() {
+	public Set<State> getStates() {
 		return this.states;
 	}
 
@@ -65,23 +62,55 @@ public class Parameter implements TransitionContainer {
 		return this.initial;
 	}
 
-	public ArrayList<Transition> getTransitions() {
-		return this.transitions;
-	}
-
 
 	@Override
 	public String toString() {
-		String toReturn = "Parameter:\n";
-		toReturn += "\tNAME:\t\t\t" + this.name + "\n";
-		if (!this.states.isEmpty()) {
-			toReturn += "\tSTATES:\t\t\t" + this.states + "\n";
+		return "P<" + this.name + ", " + this.states + ", " + this.valueRange + this.initial + ">";
+	}
+
+	public Channel getInputChannel() {
+		return inputChannel;
+	}
+
+	public Channel getOutputChannel() {
+		return outputChannel;
+	}
+
+	public ArrayList<Evaluation> getEval() {
+		ArrayList<Evaluation> toReturn = new ArrayList<>();
+		for (State state : this.states) {
+			if (this.valueRange == null) {
+				toReturn.add(new Evaluation(state, null));
+
+			} else {
+				for (int i = this.valueRange.getMin(); i <= this.valueRange.getMax(); i++) {
+					toReturn.add(new Evaluation(state, i));
+				}
+			}
 		}
-		if (this.valueRange != null) {
-			toReturn += "\tVALUE RANGE:\t" + this.valueRange + "\n";
-		}
-		toReturn += "\tINITIAL:\t\t" + this.initial + "\n\n";
 		return toReturn;
 	}
 
+	public Evaluation getEvaluation(String evaluationString) {
+
+		String[] parts = evaluationString.split(", ");
+		Integer value = null;
+		String state = null;
+		for (String part : parts) {
+			if (RegexChecker.isMember(part)) {
+				state = part.substring(2);
+			} else if (RegexChecker.isValue(part)) {
+				value = IntegerParser.parseInt(part.substring(2));
+			}
+		}
+		for (Evaluation evaluation : this.getEval()) {
+			if (state != null && state.equals(evaluation.getState().getName())) {
+				return evaluation;
+			}
+			if (value != null && value.equals(evaluation.getValue())) {
+				return evaluation;
+			}
+		}
+		return null;
+	}
 }

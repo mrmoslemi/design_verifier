@@ -91,12 +91,13 @@ public class ModelReader {
 				}
 			}
 		}
-		for (File transitionFile : this.transitionsFiles) {
-			String name = transitionFile.getName();
-			name = name.substring(0, name.indexOf(".xlsx"));
-			Parameter parameter = parameters.get(name);
-			TransitionFileReader.read(transitionFile, parameter);
-		}
+//		for (File transitionFile : this.transitionsFiles) {
+//			String name = transitionFile.getName();
+//			name = name.substring(0, name.indexOf(".xlsx"));
+////			Parameter parameter = parameters.get(name);
+////			TransitionFileReader.read(transitionFile, parameter);
+//		} TODO
+
 		this.model = new Model();
 		for (Component component : components.values()) {
 			model.addComponent(component);

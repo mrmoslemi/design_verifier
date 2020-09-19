@@ -1,5 +1,6 @@
 package modelReader.declaration;
 
+import model.State;
 import org.jetbrains.annotations.NotNull;
 
 public class ParameterState extends ParameterInformation {

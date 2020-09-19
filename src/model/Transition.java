@@ -1,89 +1,52 @@
 package model;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class Transition {
-    public enum Type {
-        SYNC,
-        STABILIZE,
-        SILENT,
-        ASYNC,
-    }
+	private String id;
+	private Action trigger;
+	private ArrayList<Guard> guards;
+	private ArrayList<Action> effects;
 
-    private String id;
-    private Type type;
-    private HashMap<Parameter, Guard> preConditions;
-    private HashMap<Parameter, Guard> postConditions;
-
-    public Transition(@NotNull String id, @NotNull HashMap<Parameter, Guard> preConditions, @NotNull HashMap<Parameter, Guard> postConditions) {
-        this.preConditions = preConditions;
-        this.postConditions = postConditions;
-        this.determineType();
-        this.id = id;
-    }
-
-    private void determineType() {
-        boolean triggerInPre = false, triggerInPost = false;
-        for (Guard guard : preConditions.values()) {
-            Mode mode = guard.getMode();
-            if (mode == Mode.T) {
-                triggerInPre = true;
-                break;
-            }
-        }
-        for (Guard guard : postConditions.values()) {
-            Mode mode = guard.getMode();
-            if (mode == Mode.T) {
-                triggerInPost = true;
-                break;
-            }
-        }
-        if (triggerInPre && triggerInPost) {
-            this.type = Type.SYNC;
-        }
-        if (triggerInPre && !triggerInPost) {
-            this.type = Type.STABILIZE;
-        }
-        if (!triggerInPre && !triggerInPost) {
-            this.type = Type.SILENT;
-        }
-        if (!triggerInPre && triggerInPost) {
-            this.type = Type.ASYNC;
-        }
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder toReturn = new StringBuilder("[");
-        for (Parameter parameter : this.preConditions.keySet()) {
-            toReturn.append(parameter.getName()).append(":").append("(").append(this.preConditions.get(parameter).toString()).append("), ");
-        }
-        toReturn.delete(toReturn.length() - 2, toReturn.length());
-        toReturn.append("] --> [");
-        for (Parameter parameter : this.postConditions.keySet()) {
-            toReturn.append(parameter.getName()).append(":").append("(").append(this.postConditions.get(parameter).toString()).append("), ");
-        }
-        toReturn.delete(toReturn.length() - 2, toReturn.length());
-        toReturn.append("]");
-        return toReturn.toString();
-    }
-
-    public HashMap<Parameter, Guard> getPreConditions() {
-        return this.preConditions;
-    }
-
-    public HashMap<Parameter, Guard> getPostConditions() {
-        return this.postConditions;
-    }
-
-    public String getId(){
-    	return this.id;
+	public Transition(@NotNull String id, @Nullable Action trigger, @NotNull ArrayList<Guard> guards, @NotNull ArrayList<Action> effects) {
+		this.id = id;
+		this.trigger = trigger;
+		this.guards = guards;
+		this.effects = effects;
 	}
-    @NotNull
-    public Type getType() {
-        return this.type;
-    }
+
+	@Override
+	public String toString() {
+
+		StringBuilder toReturn = new StringBuilder("(");
+		if (this.guards.isEmpty()) {
+			toReturn.append("true");
+		} else {
+			for (Guard guard : this.guards) {
+				toReturn.append(guard).append(" && \n\t\t");
+			}
+			toReturn.delete(toReturn.length() - 7, toReturn.length());
+		}
+		toReturn.append(")\n\t\t->\n");
+		for (Action action : this.effects) {
+			toReturn.append("\t\t").append(action).append(";\n");
+		}
+		return toReturn.toString();
+	}
+
+	public Action getTrigger() {
+		return this.trigger;
+	}
+
+	public String getId() {
+		return this.id;
+	}
+
+	public ArrayList<Guard> getGuards() {
+		return this.guards;
+	}
 
 }

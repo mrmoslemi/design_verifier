@@ -1,11 +1,8 @@
 package model;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 
-public class Component implements TransitionContainer {
+public class Component {
 	private String name;
 	private ArrayList<Parameter> parameters;
 	private ArrayList<Parameter> outputParameters;
@@ -41,15 +38,6 @@ public class Component implements TransitionContainer {
 		transitions.add(transition);
 	}
 
-	@Nullable
-	public Parameter getParameterByName(@NotNull String parameterName) {
-		for (Parameter parameter : this.parameters) {
-			if (parameter.getName().equals(parameterName)) {
-				return parameter;
-			}
-		}
-		return null;
-	}
 
 	public ArrayList<Parameter> getParameters() {
 		return this.parameters;
@@ -65,6 +53,36 @@ public class Component implements TransitionContainer {
 
 	public ArrayList<Transition> getTransitions() {
 		return this.transitions;
+	}
+
+	public ArrayList<Channel> getInputChannels() {
+		ArrayList<Channel> toReturn = new ArrayList<>();
+		for (Parameter parameter : this.parameters) {
+			toReturn.add(parameter.getInputChannel());
+		}
+		return toReturn;
+	}
+
+	public ArrayList<Channel> getOutputChannels() {
+		ArrayList<Channel> toReturn = new ArrayList<>();
+		for (Parameter parameter : this.outputParameters) {
+			toReturn.add(parameter.getOutputChannel());
+		}
+		return toReturn;
+	}
+
+	public ArrayList<Channel> getChannels() {
+		ArrayList<Channel> channels = new ArrayList<>(this.getInputChannels());
+		channels.addAll(this.getOutputChannels());
+		return channels;
+	}
+
+	public ArrayList<Action> getInputActions() {
+		ArrayList<Action> actions = new ArrayList<>();
+		for (Channel channel : this.getInputChannels()) {
+			actions.addAll(channel.getActions());
+		}
+		return actions;
 	}
 
 	@Override
