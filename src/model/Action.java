@@ -5,13 +5,13 @@ public class Action {
 
 	public enum Type {read, write}
 
-	private State state;
+	private Evaluation evaluation;
 	private Type type;
 	private Channel channel;
 
 
-	public Action(Channel channel, State state, Type type) {
-		this.state = state;
+	public Action(Channel channel, Evaluation evaluation, Type type) {
+		this.evaluation = evaluation;
 		this.type = type;
 		this.channel = channel;
 	}
@@ -25,12 +25,28 @@ public class Action {
 		return this.type;
 	}
 
-	public State getState() {
-		return this.state;
+	public Evaluation getEvaluation() {
+		return this.evaluation;
 	}
 
 	public String toString() {
-		return this.channel + (type == Type.read ? "?" : "!") + this.state;
+		String toReturn = "";
+		if (type == Type.read) {
+			toReturn += this.channel + "?" + this.evaluation.getState() + ";";
+			if (this.evaluation.getState() != null) {
+				toReturn += this.channel.getParameter().getName() + " = " + this.evaluation.getState() + ";";
+			}
+			if (this.evaluation.getValue() != null) {
+				toReturn += this.channel.getParameter().getName() + "_value = " + this.evaluation.getValue() + ";";
+			}
+		} else {
+			if (this.evaluation.getValue() != null) {
+				toReturn += this.channel.getParameter().getName() + "_value = " + this.evaluation.getValue() + ";";
+			}
+			toReturn += this.channel + "!" + this.evaluation.getState() + ";";
+
+		}
+		return toReturn;
 	}
 
 }

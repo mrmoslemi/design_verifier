@@ -32,7 +32,7 @@ public class Transition {
 		}
 		toReturn.append(")\n\t\t->\n");
 		for (Action action : this.effects) {
-			toReturn.append("\t\t").append(action).append(";\n");
+			toReturn.append("\t\t").append(action).append("\n");
 		}
 		return toReturn.toString();
 	}

@@ -113,4 +113,9 @@ public class Parameter {
 		}
 		return null;
 	}
+
+	public Evaluation getRawEvaluation(String evaluationString) {
+		Evaluation evaluation = getEvaluation(evaluationString);
+		return new Evaluation(evaluation.getState(), null);
+	}
 }

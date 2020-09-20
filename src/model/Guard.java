@@ -81,17 +81,17 @@ public class Guard {
 		String parameterName = this.parameter.getName().toLowerCase();
 		if (this.getState() != null) {
 			String stateName = parameterName + "_" + this.getState().toLowerCase();
-			String stateGuard = parameterName + ".state == " + stateName;
+			String stateGuard = parameterName + " == " + stateName;
 			parameterGuards.add(stateGuard);
 		}
 		if (this.getValueRange() != null) {
-			String minGuard = parameterName + ".value >= " + this.getValueRange().getMin();
-			String maxGuard = parameterName + ".value <= " + this.getValueRange().getMax();
+			String minGuard = parameterName + "_value >= " + this.getValueRange().getMin();
+			String maxGuard = parameterName + "_value <= " + this.getValueRange().getMax();
 			parameterGuards.add(minGuard);
 			parameterGuards.add(maxGuard);
 		}
 		if (this.getValue() != null) {
-			String valueGuard = parameterName + ".value == " + this.getValue();
+			String valueGuard = parameterName + "_value == " + this.getValue();
 			parameterGuards.add(valueGuard);
 		}
 		StringBuilder toReturn = new StringBuilder("(");

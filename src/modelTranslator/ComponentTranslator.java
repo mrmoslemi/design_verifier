@@ -22,25 +22,25 @@ public class ComponentTranslator {
 			modelBuilder.append(ChannelTranslator.translate(channel));
 		}
 
-		modelBuilder.append("\n\nactive proctype ");
 
-		modelBuilder.append(getName(component));
-		modelBuilder.append(" (){\n");
 		for (Parameter parameter : component.getParameters()) {
-			String parameterName = parameter.getName().toLowerCase();
+			String parameterName = parameter.getName();
 			String parameterTypedefName = parameterName + "_states";
-			modelBuilder.append("\t");
 			modelBuilder.append(parameterTypedefName);
 			modelBuilder.append(" ");
 			modelBuilder.append(parameterName);
 			modelBuilder.append(";\n");
 			if (parameter.getValueRange() != null) {
 				String parameterNameValue = parameterName + "_value";
-				modelBuilder.append("\tint ");
+				modelBuilder.append("int ");
 				modelBuilder.append(parameterNameValue);
 				modelBuilder.append(";\n");
 			}
 		}
+		modelBuilder.append("\n\nactive proctype ");
+
+		modelBuilder.append(getName(component));
+		modelBuilder.append(" (){\n");
 		modelBuilder.append("\tdo\n");
 		ArrayList<Action> actions = component.getInputActions();
 		HashMap<Action, ArrayList<Transition>> body = new HashMap<>();
@@ -52,7 +52,7 @@ public class ComponentTranslator {
 		}
 		for (Action action : actions) {
 			modelBuilder.append("\n\n\t// TRIGGER\n");
-			modelBuilder.append("\t:: ").append(action).append(";\n");
+			modelBuilder.append("\t:: ").append(action).append("\n");
 			ArrayList<Transition> transitions = body.get(action);
 			if (!transitions.isEmpty()) {
 				modelBuilder.append("\t\tif\n");

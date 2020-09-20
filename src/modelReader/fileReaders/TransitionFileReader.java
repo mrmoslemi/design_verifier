@@ -62,7 +62,7 @@ public class TransitionFileReader {
 				guards.add(new Guard(parameter, guardCell));
 				if (StringUtils.getGuardMode(guardCell) == Mode.T) {
 					Channel inputChannel = parameter.getInputChannel();
-					trigger = inputChannel.getAction(parameter.getEvaluation(guardCell).getState());
+					trigger = inputChannel.getAction(parameter.getEvaluation(guardCell));
 				}
 			} else if (!guardCell.equals("N/A")) {
 				throw Error.combine(ErrorType.INVALID_GUARD, guardCell);
@@ -71,13 +71,12 @@ public class TransitionFileReader {
 		for (Parameter parameter : effectColumns.keySet()) {
 			int column = effectColumns.get(parameter);
 			String effectCell = row.get(column);
-			if (RegexChecker.isMember(effectCell)) {
+			if (RegexChecker.isGuard(effectCell)) {
 				Channel outputChannel = parameter.getOutputChannel();
-				Action effect = outputChannel.getAction(parameter.getEvaluation(effectCell).getState());
+				Action effect = outputChannel.getAction(parameter.getEvaluation(effectCell));
 				effects.add(effect);
-				//TODO value effects!
-//			} else if (!effectCell.equals("NO_CHANGE")) {
-//				throw Error.combine(ErrorType.INVALID_EFFECT, effectCell);
+			} else if (!effectCell.equals("NO_CHANGE")) {
+				throw Error.combine(ErrorType.INVALID_EFFECT, effectCell);
 			}
 		}
 		Transition transition = new Transition(row.get(0), trigger, guards, effects);

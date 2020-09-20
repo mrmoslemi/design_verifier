@@ -24,17 +24,17 @@ public class Channel {
 		if (actions == null) {
 			actions = new ArrayList<>();
 			Action.Type actionType = this.type == Type.in ? Action.Type.read : Action.Type.write;
-			for (State state : parameter.getStates()) {
-				Action action = new Action(this, state, actionType);
+			for (Evaluation evaluation : parameter.getEval()) {
+				Action action = new Action(this, evaluation, actionType);
 				actions.add(action);
 			}
 		}
 		return this.actions;
 	}
 
-	public Action getAction(State state) {
+	public Action getAction(Evaluation evaluation) {
 		for (Action action : this.getActions()) {
-			if (action.getState().equals(state)) {
+			if (action.getEvaluation().equals(evaluation)) {
 				return action;
 			}
 		}
