@@ -79,11 +79,12 @@ public class Parameter {
 	public ArrayList<Evaluation> getEval() {
 		ArrayList<Evaluation> toReturn = new ArrayList<>();
 		for (State state : this.states) {
-			if (this.valueRange == null) {
-				toReturn.add(new Evaluation(state, null));
-
-			} else {
-				for (int i = this.valueRange.getMin(); i <= this.valueRange.getMax(); i++) {
+			toReturn.add(new Evaluation(state, null));
+		}
+		if (this.valueRange != null) {
+			for (int i = this.valueRange.getMin(); i <= this.valueRange.getMax(); i++) {
+				toReturn.add(new Evaluation(null, i));
+				for (State state : this.states) {
 					toReturn.add(new Evaluation(state, i));
 				}
 			}
@@ -92,7 +93,6 @@ public class Parameter {
 	}
 
 	public Evaluation getEvaluation(String evaluationString) {
-
 		String[] parts = evaluationString.split(", ");
 		Integer value = null;
 		String state = null;
@@ -103,19 +103,35 @@ public class Parameter {
 				value = IntegerParser.parseInt(part.substring(2));
 			}
 		}
+
 		for (Evaluation evaluation : this.getEval()) {
-			if (state != null && state.equals(evaluation.getState().getName())) {
+			if (evaluation.getState() != null && evaluation.getState().getName().equals(state) &&
+					evaluation.getValue() != null && evaluation.getValue().equals(value)) {
 				return evaluation;
 			}
-			if (value != null && value.equals(evaluation.getValue())) {
+			if (evaluation.getState() == null && state == null &&
+					evaluation.getValue() != null && evaluation.getValue().equals(value)) {
 				return evaluation;
+			}
+			if (evaluation.getState() != null && evaluation.getState().getName().equals(state) &&
+					evaluation.getValue() == null && value == null) {
+				return evaluation;
+			}
+		}
+		System.out.println("returning null eval\t" + evaluationString + "\t" + state + "\t" + value);
+		for (Evaluation evaluation : this.getEval()) {
+			System.out.println("EVAL\t" + evaluation.toString());
+		}
+		return null;
+	}
+
+	public State getStateByName(String stateName) {
+		for (State state : this.states) {
+			if (state.getName().equals(stateName)) {
+				return state;
 			}
 		}
 		return null;
 	}
 
-	public Evaluation getRawEvaluation(String evaluationString) {
-		Evaluation evaluation = getEvaluation(evaluationString);
-		return new Evaluation(evaluation.getState(), null);
-	}
 }

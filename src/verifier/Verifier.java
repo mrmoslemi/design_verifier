@@ -6,11 +6,12 @@ import modelTranslator.ComponentTranslator;
 
 public class Verifier {
 
-    public static Result verify(Model model, Property property) {
-        Component component = model.getComponentByName("CONTROLLER");
-        System.out.println(ComponentTranslator.translate(component));
-        AutomataLearner.init(component);
-        return null;
+	public static Result verify(Model model, Property property) {
+		Component component = model.getComponentByName("CONTROLLER");
+		String s = ComponentTranslator.translate(component);
+        System.out.println(s);
+		AutomataLearner.init(component);
+		return null;
 //        if (model.getComponents().isEmpty()) {
 //            return ModelChecker.check(null, property);
 //        }
@@ -40,5 +41,5 @@ public class Verifier {
 //            }
 //        }
 
-    }
+	}
 }

@@ -23,20 +23,41 @@ public class Channel {
 	public ArrayList<Action> getActions() {
 		if (actions == null) {
 			actions = new ArrayList<>();
-			Action.Type actionType = this.type == Type.in ? Action.Type.read : Action.Type.write;
-			for (Evaluation evaluation : parameter.getEval()) {
-				Action action = new Action(this, evaluation, actionType);
-				actions.add(action);
+			if (this.type == Type.in) {
+				for (State state : parameter.getStates()) {
+					Action action = new ReadAction(this, state);
+					actions.add(action);
+				}
+			} else {
+				for (Evaluation evaluation : parameter.getEval()) {
+					Action action = new WriteAction(this, evaluation);
+					actions.add(action);
+				}
 			}
 		}
 		return this.actions;
 	}
 
-	public Action getAction(Evaluation evaluation) {
+	public Action getActionByState(State state) {
 		for (Action action : this.getActions()) {
-			if (action.getEvaluation().equals(evaluation)) {
-				return action;
+			if (action instanceof ReadAction) {
+				if (((ReadAction) action).getState().equals(state)) {
+					return action;
+				}
 			}
+
+		}
+		return null;
+	}
+
+	public Action getActionByEvaluation(Evaluation evaluation) {
+		for (Action action : this.getActions()) {
+			if (action instanceof WriteAction) {
+				if (((WriteAction) action).getEvaluation().equals(evaluation)) {
+					return action;
+				}
+			}
+
 		}
 		return null;
 	}

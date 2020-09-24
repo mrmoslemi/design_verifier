@@ -1,7 +1,6 @@
 package model;
 
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -9,7 +8,7 @@ public class Evaluation {
 	private State state;
 	private Integer value;
 
-	public Evaluation(@NotNull State state, @Nullable Integer value) {
+	public Evaluation(@Nullable State state, @Nullable Integer value) {
 		this.state = state;
 		this.value = value;
 	}
@@ -26,7 +25,14 @@ public class Evaluation {
 
 	@Override
 	public String toString() {
-		String toReturn = "(" + this.state + ", ";
+		String toReturn = "(";
+
+		if (this.state != null) {
+			toReturn += state;
+		} else {
+			toReturn += "NA";
+		}
+		toReturn += ", ";
 		if (this.value != null) {
 			toReturn += this.value;
 		} else {
@@ -38,13 +44,28 @@ public class Evaluation {
 
 	@Override
 	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
 		if (o instanceof Evaluation) {
 			Evaluation otherEvaluation = (Evaluation) o;
-			boolean equal = this.state.equals(otherEvaluation.state);
-			if (this.value != null) {
-				equal = this.value.equals(otherEvaluation.value) && equal;
+			if ((otherEvaluation.state == null || this.state == null)
+					&&
+					!(otherEvaluation.state == null && this.state == null)) {
+				return false;
 			}
-			return equal;
+			if (this.state != null && !this.state.equals(otherEvaluation.state)) {
+				return false;
+			}
+			if ((otherEvaluation.value == null || this.value == null)
+					&&
+					!(otherEvaluation.value == null && this.value == null)) {
+				return false;
+			}
+			if (this.value != null && !this.value.equals(otherEvaluation.value)) {
+				return false;
+			}
+			return true;
 		} else {
 			return false;
 		}

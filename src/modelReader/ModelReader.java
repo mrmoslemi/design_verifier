@@ -35,12 +35,6 @@ public class ModelReader {
 			Component component = new Component(file.getName());
 			components.put(component.getName(), component);
 		}
-		for (File transitionFile : this.transitionsFiles) {
-			String name = transitionFile.getName();
-			name = name.substring(0, name.indexOf(".xlsx"));
-			Parameter parameter = new Parameter(name);
-			parameters.put(name, parameter);
-		}
 		MergedIOReader mergedIOReader = new MergedIOReader(this.mergedIOFile);
 		ArrayList<ParameterInformation> informations = mergedIOReader.parse();
 		for (ParameterInformation information : informations) {
@@ -48,7 +42,6 @@ public class ModelReader {
 			if (parameter == null) {
 				parameter = new Parameter(information.getName());
 				parameters.put(information.getName(), parameter);
-				Log.warning(information.getName() + " parameter has no transitions");
 			}
 			if (information instanceof ParameterDetails) {
 				ParameterDetails details = ((ParameterDetails) information);
@@ -58,7 +51,7 @@ public class ModelReader {
 				for (String componentName : details.getComponentNames()) {
 					Component component = components.get(componentName);
 					component.addParameter(parameter);
-					if(component!= owner){
+					if (component != owner) {
 						component.addInputParameter(parameter);
 
 					}
@@ -73,7 +66,6 @@ public class ModelReader {
 			}
 
 		}
-
 
 		for (File file : this.componentFolders) {
 			Component component = components.get(file.getName());
@@ -91,12 +83,19 @@ public class ModelReader {
 				}
 			}
 		}
-//		for (File transitionFile : this.transitionsFiles) {
-//			String name = transitionFile.getName();
-//			name = name.substring(0, name.indexOf(".xlsx"));
-////			Parameter parameter = parameters.get(name);
-////			TransitionFileReader.read(transitionFile, parameter);
-//		} TODO
+		for (File transitionFile : this.transitionsFiles) {
+			String name = transitionFile.getName();
+			name = name.substring(0, name.indexOf(".xlsx"));
+			Parameter parameter = parameters.get(name);
+			Component component = null;
+			for (Component c : components.values()) {
+				if (c.getOutputParameters().contains(parameter)) {
+					component = c;
+				}
+			}
+			assert component != null;
+			TransitionFileReader.read(transitionFile, component);
+		}
 
 		this.model = new Model();
 		for (Component component : components.values()) {
@@ -149,9 +148,10 @@ public class ModelReader {
 		assert transitionFiles != null;
 		for (File transitionFile : transitionFiles) {
 			if (transitionFile.isDirectory() || !transitionFile.getName().endsWith(".xlsx")) {
-				throw new IllegalStateException("bad transition file");
+				Log.warning("Unused file " + transitionFile.getName());
+			}else {
+				this.transitionsFiles.add(transitionFile);
 			}
-			this.transitionsFiles.add(transitionFile);
 		}
 	}
 

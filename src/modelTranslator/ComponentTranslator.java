@@ -1,6 +1,7 @@
 package modelTranslator;
 
 import model.*;
+import utils.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,13 +43,18 @@ public class ComponentTranslator {
 		modelBuilder.append(getName(component));
 		modelBuilder.append(" (){\n");
 		modelBuilder.append("\tdo\n");
-		ArrayList<Action> actions = component.getInputActions();
+		ArrayList<Action> actions = component.getReadActions();
 		HashMap<Action, ArrayList<Transition>> body = new HashMap<>();
 		for (Action action : actions) {
 			body.put(action, new ArrayList<>());
 		}
 		for (Transition transition : component.getTransitions()) {
-			body.get(transition.getTrigger()).add(transition);
+			if(transition.getTrigger()!=null){
+				body.get(transition.getTrigger()).add(transition);
+			}else {
+				Log.warning("transition passed");
+			}
+
 		}
 		for (Action action : actions) {
 			modelBuilder.append("\n\n\t// TRIGGER\n");

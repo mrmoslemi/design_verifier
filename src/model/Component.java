@@ -77,7 +77,7 @@ public class Component {
 		return channels;
 	}
 
-	public ArrayList<Action> getInputActions() {
+	public ArrayList<Action> getReadActions() {
 		ArrayList<Action> actions = new ArrayList<>();
 		for (Channel channel : this.getInputChannels()) {
 			actions.addAll(channel.getActions());

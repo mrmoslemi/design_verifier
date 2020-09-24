@@ -1,10 +1,8 @@
 package modelReader.fileReaders;
 
 import model.*;
+import utils.*;
 import utils.Error;
-import utils.ErrorType;
-import utils.RegexChecker;
-import utils.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -59,10 +57,11 @@ public class TransitionFileReader {
 			int column = guardColumns.get(parameter);
 			String guardCell = row.get(column);
 			if (RegexChecker.isGuard(guardCell)) {
-				guards.add(new Guard(parameter, guardCell));
+				Guard guard = new Guard(parameter, guardCell);
+				guards.add(guard);
 				if (StringUtils.getGuardMode(guardCell) == Mode.T) {
 					Channel inputChannel = parameter.getInputChannel();
-					trigger = inputChannel.getAction(parameter.getEvaluation(guardCell));
+					trigger = inputChannel.getActionByState(guard.getState());
 				}
 			} else if (!guardCell.equals("N/A")) {
 				throw Error.combine(ErrorType.INVALID_GUARD, guardCell);
@@ -73,7 +72,13 @@ public class TransitionFileReader {
 			String effectCell = row.get(column);
 			if (RegexChecker.isGuard(effectCell)) {
 				Channel outputChannel = parameter.getOutputChannel();
-				Action effect = outputChannel.getAction(parameter.getEvaluation(effectCell));
+				Evaluation evaluation = parameter.getEvaluation(effectCell);
+				Action effect = outputChannel.getActionByEvaluation(evaluation);
+				if(effect==null){
+					Log.error("effect cell\t"+effectCell);
+					Log.error("evaluation\t"+evaluation);
+					Log.error("channel\t"+outputChannel);
+				}
 				effects.add(effect);
 			} else if (!effectCell.equals("NO_CHANGE")) {
 				throw Error.combine(ErrorType.INVALID_EFFECT, effectCell);

@@ -11,20 +11,18 @@ import java.util.ArrayList;
 
 public class Guard {
 	private Parameter parameter;
-	private String stringValue;
 	private Mode mode;
-	private String state;
+	private State state;
 	private ValueRange valueRange;
 	private Integer value;
 
 	public Guard(Parameter parameter, String stringValue) {
 		this.parameter = parameter;
-		this.stringValue = stringValue;
 		String[] parts = stringValue.split(", ");
 		for (String part : parts) {
 			if (RegexChecker.isMember(part)) {
 				this.mode = StringUtils.getMode(part.substring(0, 1));
-				this.state = part.substring(2);
+				this.state = parameter.getStateByName(part.substring(2));
 			} else if (RegexChecker.isValue(part)) {
 				this.value = IntegerParser.parseInt(part.substring(2));
 			} else if (RegexChecker.isRange(part)) {
@@ -33,22 +31,6 @@ public class Guard {
 		}
 	}
 
-	public Guard(@Nullable Mode mode, @Nullable String state, @Nullable Integer value) {
-		this(mode, state, null, value);
-	}
-
-	private Guard(@Nullable Mode mode, @Nullable String state, @Nullable ValueRange valueRange, @Nullable Integer value) {
-		if ((mode == null && state != null) || (mode != null && state == null)) {
-			throw Error.combine(ErrorType.EVALUATION_MODE_STATE_ERROR, mode + "", state + "");
-		}
-		if (mode == null && valueRange == null && value == null) {
-			throw Error.combine(ErrorType.EVALUATION_ALL_NULL_ERROR);
-		}
-		this.mode = mode;
-		this.state = state;
-		this.valueRange = valueRange;
-		this.value = value;
-	}
 
 	@NotNull
 	public Parameter getParameter() {
@@ -61,7 +43,7 @@ public class Guard {
 	}
 
 	@Nullable
-	public String getState() {
+	public State getState() {
 		return this.state;
 	}
 
@@ -80,8 +62,7 @@ public class Guard {
 		ArrayList<String> parameterGuards = new ArrayList<>();
 		String parameterName = this.parameter.getName().toLowerCase();
 		if (this.getState() != null) {
-			String stateName = parameterName + "_" + this.getState().toLowerCase();
-			String stateGuard = parameterName + " == " + stateName;
+			String stateGuard = parameterName + " == " + this.getState();
 			parameterGuards.add(stateGuard);
 		}
 		if (this.getValueRange() != null) {
@@ -94,7 +75,7 @@ public class Guard {
 			String valueGuard = parameterName + "_value == " + this.getValue();
 			parameterGuards.add(valueGuard);
 		}
-		StringBuilder toReturn = new StringBuilder("(");
+		StringBuilder toReturn = new StringBuilder();
 		for (String guard : parameterGuards) {
 			toReturn.append("(").append(guard).append(")").append(" && ");
 		}
