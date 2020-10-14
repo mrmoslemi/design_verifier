@@ -1,263 +1,865 @@
-#define N 12
-	controller_state_pos,
-	controller_state_produce,
-	controller_state_select,
-	controller_state_info,
-	controller_state_another
-	coffee_type_espresso,
-	coffee_type_americano,
-	coffee_type_mocha,
-	coffee_type_latte
-	sugar_counter_dec,
-	sugar_counter_inc
-	milk_counter_dec,
-	milk_counter_inc
-	coffee_counter_dec,
-	coffee_counter_inc
-	another_timer_stop,
-	another_timer_start,
-	another_timer_timeout,
-	another_timer_running
-	producer_state_take,
-	producer_state_produced,
-	producer_state_producing
-	pos_state_working,
-	pos_state_idle,
-	pos_state_failed,
-	pos_state_paid
-	action_take,
-	action_select_latte,
-	action_another_no,
-	action_another_yes,
-	action_inc_sugar,
-	action_dec_sugar,
-	action_produce_cancel,
-	action_select_americano,
-	action_dec_milk,
-	action_select_espresso,
-	action_inc_milk,
-	action_dec_coffee,
-	action_inc_coffee,
-	action_select_mocha,
-	action_pos_failed,
-	action_pos_paid,
-	action_produce_ok
+mtype = {
+	Controller_State_POS,
+	Controller_State_Produce,
+	Controller_State_Another,
+	Controller_State_Select,
+	Controller_State_Info,
+	Coffee_Type_Americano,
+	Coffee_Type_Espresso,
+	Coffee_Type_Latte,
+	Coffee_Type_Mocha,
+	Sugar_Counter_Inc,
+	Sugar_Counter_Dec,
+	Milk_Counter_Dec,
+	Milk_Counter_Inc,
+	Coffee_Counter_Dec,
+	Coffee_Counter_Inc,
+	Another_Timer_Timeout,
+	Another_Timer_Stop,
+	Another_Timer_Start,
+	Another_Timer_Running,
+	Producer_State_Take,
+	Producer_State_Producing,
+	Producer_State_Produced,
+	POS_State_Paid,
+	POS_State_Idle,
+	POS_State_Failed,
+	POS_State_Working,
+	Action_Take,
+	Action_Select_Mocha,
+	Action_POS_Failed,
+	Action_Another_Yes,
+	Action_POS_Paid,
+	Action_Produce_Ok,
+	Action_Produce_Cancel,
+	Action_Inc_Coffee,
+	Action_Select_Espresso,
+	Action_Select_Latte,
+	Action_Dec_Milk,
+	Action_Another_No,
+	Action_Dec_Coffee,
+	Action_Select_Americano,
+	Action_Inc_Milk,
+	Action_Dec_Sugar,
+	Action_Inc_Sugar
+}
+
+chan Controller_State_cin = [0] of {mtype};
+
+chan Coffee_Type_cin = [0] of {mtype};
+
+chan Sugar_Counter_cin = [0] of {mtype};
+
+chan Milk_Counter_cin = [0] of {mtype};
+
+chan Coffee_Counter_cin = [0] of {mtype};
+
+chan Another_Timer_cin = [0] of {mtype};
+
+chan Producer_State_cin = [0] of {mtype};
+
+chan POS_State_cin = [0] of {mtype};
+
+chan Action_cin = [0] of {mtype};
+
+chan Controller_State_cout = [0] of {mtype};
+
+chan Coffee_Type_cout = [0] of {mtype};
+
+chan Sugar_Counter_cout = [0] of {mtype};
+
+chan Milk_Counter_cout = [0] of {mtype};
+
+chan Coffee_Counter_cout = [0] of {mtype};
+
+chan Another_Timer_cout = [0] of {mtype};
+
+mtype Controller_State;
+mtype Coffee_Type;
+mtype Sugar_Counter;
+int Sugar_Counter_value;
+mtype Milk_Counter;
+int Milk_Counter_value;
+mtype Coffee_Counter;
+int Coffee_Counter_value;
+mtype Another_Timer;
+int Another_Timer_value;
+mtype Producer_State;
+mtype POS_State;
+mtype Action;
 
 
-controller_state_parameter controller_state;
-coffee_type_parameter coffee_type;
-sugar_counter_parameter sugar_counter;
-milk_counter_parameter milk_counter;
-coffee_counter_parameter coffee_counter;
-another_timer_parameter another_timer;
-producer_state_parameter producer_state;
-pos_state_parameter pos_state;
-action_parameter action;
-
-active proctype controller (){
-
+active proctype CONTROLLER (){
 	do
+
+
+	// TRIGGER
 	::
+		Controller_State_cin?Controller_State_POS;Controller_State=Controller_State_POS;
+
+
+
+	// TRIGGER
+	::
+		Controller_State_cin?Controller_State_Produce;Controller_State=Controller_State_Produce;
+
+
+
+	// TRIGGER
+	::
+		Controller_State_cin?Controller_State_Another;Controller_State=Controller_State_Another;
+
+
+
+	// TRIGGER
+	::
+		Controller_State_cin?Controller_State_Select;Controller_State=Controller_State_Select;
+
+
+
+	// TRIGGER
+	::
+		Controller_State_cin?Controller_State_Info;Controller_State=Controller_State_Info;
+
+
+
+	// TRIGGER
+	::
+		Coffee_Type_cin?Coffee_Type_Americano;Coffee_Type=Coffee_Type_Americano;
+
 		if
-		:: ((another_timer.state == another_timer_running)) -> another_timer.state = another_timer_timeout; another_timer_channel!another_timer_timeout;
+		// TRANSITION CONTROLLER_SRS_6
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_America)
+			->
+			Sugar_Counter_value = 0; Coffee_Counter_value = 7; Milk_Counter_value = 0; 
 		fi;
-	::another_timer_channel?another_timer_timeout;
+
+
+	// TRIGGER
+	::
+		Coffee_Type_cin?Coffee_Type_Espresso;Coffee_Type=Coffee_Type_Espresso;
+
 		if
-		:: ((controller_state.state == controller_state_another) && (another_timer.state == another_timer_timeout)) -> controller_state.state = controller_state_select; controller_state_channel!controller_state_select;
-		:: ((another_timer.state == another_timer_timeout)) -> another_timer.state = another_timer_stop;
+		// TRANSITION CONTROLLER_SRS_5
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Espres)
+			->
+			Sugar_Counter_value = 0; Coffee_Counter_value = 7; Milk_Counter_value = 0; 
 		fi;
-	::coffee_type_channel?coffee_type_americano;
+
+
+	// TRIGGER
+	::
+		Coffee_Type_cin?Coffee_Type_Latte;Coffee_Type=Coffee_Type_Latte;
+
 		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_americano)) -> sugar_counter.value = 0; milk_counter.value = 0; coffee_counter.value = 7;
-		:: ((coffee_type.state == coffee_type_americano)) -> coffee_type.state = coffee_type_americano;
+		// TRANSITION CONTROLLER_SRS_7
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Lat)
+			->
+			Sugar_Counter_value = 3; Coffee_Counter_value = 5; Milk_Counter_value = 5; 
 		fi;
-	::controller_state_channel?controller_state_pos;
+
+
+	// TRIGGER
+	::
+		Coffee_Type_cin?Coffee_Type_Mocha;Coffee_Type=Coffee_Type_Mocha;
+
 		if
-		:: ((controller_state.state == controller_state_pos)) -> controller_state.state = controller_state_pos;
+		// TRANSITION CONTROLLER_SRS_8
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Moc)
+			->
+			Sugar_Counter_value = 3; Coffee_Counter_value = 4; Milk_Counter_value = 3; 
 		fi;
-	::coffee_type_channel?coffee_type_latte;
+
+
+	// TRIGGER
+	::
+		Sugar_Counter_cin?Sugar_Counter_Inc;Sugar_Counter=Sugar_Counter_Inc;
+
 		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_latte)) -> sugar_counter.value = 3; milk_counter.value = 5; coffee_counter.value = 5;
-		:: ((coffee_type.state == coffee_type_latte)) -> coffee_type.state = coffee_type_latte;
+		// TRANSITION Sugar_Counter_SRS_1
+		::
+			 ((Sugar_Counter == Sugar_Counter_Inc) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 1; 
+		// TRANSITION Sugar_Counter_SRS_2
+		::
+			 ((Sugar_Counter == Sugar_Counter_Inc) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 2; 
+		// TRANSITION Sugar_Counter_SRS_3
+		::
+			 ((Sugar_Counter == Sugar_Counter_Inc) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 3; 
+		// TRANSITION Sugar_Counter_SRS_4
+		::
+			 ((Sugar_Counter == Sugar_Counter_Inc) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 4; 
+		// TRANSITION Sugar_Counter_SRS_5
+		::
+			 ((Sugar_Counter == Sugar_Counter_Inc) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 5; 
+		// TRANSITION Sugar_Counter_SRS_6
+		::
+			 ((Sugar_Counter == Sugar_Counter_Inc) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 6; 
+		// TRANSITION Sugar_Counter_SRS_7
+		::
+			 ((Sugar_Counter == Sugar_Counter_Inc) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 7; 
 		fi;
-	::pos_state_channel?pos_state_paid;
+
+
+	// TRIGGER
+	::
+		Sugar_Counter_cin?Sugar_Counter_Dec;Sugar_Counter=Sugar_Counter_Dec;
+
 		if
-		:: ((controller_state.state == controller_state_pos) && (pos_state.state == pos_state_paid)) -> controller_state.state = controller_state_produce; controller_state_channel!controller_state_produce;
+		// TRANSITION Sugar_Counter_SRS_8
+		::
+			 ((Sugar_Counter == Sugar_Counter_Dec) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 0; 
+		// TRANSITION Sugar_Counter_SRS_9
+		::
+			 ((Sugar_Counter == Sugar_Counter_Dec) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 1; 
+		// TRANSITION Sugar_Counter_SRS_10
+		::
+			 ((Sugar_Counter == Sugar_Counter_Dec) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 2; 
+		// TRANSITION Sugar_Counter_SRS_11
+		::
+			 ((Sugar_Counter == Sugar_Counter_Dec) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 3; 
+		// TRANSITION Sugar_Counter_SRS_12
+		::
+			 ((Sugar_Counter == Sugar_Counter_Dec) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 4; 
+		// TRANSITION Sugar_Counter_SRS_13
+		::
+			 ((Sugar_Counter == Sugar_Counter_Dec) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 5; 
+		// TRANSITION Sugar_Counter_SRS_14
+		::
+			 ((Sugar_Counter == Sugar_Counter_Dec) && (Sugar_Counter_value ==)
+			->
+			Sugar_Counter_value = 6; 
 		fi;
-	::controller_state_channel?controller_state_info;
+
+
+	// TRIGGER
+	::
+		Milk_Counter_cin?Milk_Counter_Dec;Milk_Counter=Milk_Counter_Dec;
+
 		if
-		:: ((controller_state.state == controller_state_info)) -> controller_state.state = controller_state_info;
+		// TRANSITION Milk_Counter_SRS_8
+		::
+			 ((Milk_Counter == Milk_Counter_Dec) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 0; 
+		// TRANSITION Milk_Counter_SRS_9
+		::
+			 ((Milk_Counter == Milk_Counter_Dec) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 1; 
+		// TRANSITION Milk_Counter_SRS_10
+		::
+			 ((Milk_Counter == Milk_Counter_Dec) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 2; 
+		// TRANSITION Milk_Counter_SRS_11
+		::
+			 ((Milk_Counter == Milk_Counter_Dec) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 3; 
+		// TRANSITION Milk_Counter_SRS_12
+		::
+			 ((Milk_Counter == Milk_Counter_Dec) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 4; 
+		// TRANSITION Milk_Counter_SRS_13
+		::
+			 ((Milk_Counter == Milk_Counter_Dec) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 5; 
+		// TRANSITION Milk_Counter_SRS_14
+		::
+			 ((Milk_Counter == Milk_Counter_Dec) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 6; 
 		fi;
-	::controller_state_channel?controller_state_another;
+
+
+	// TRIGGER
+	::
+		Milk_Counter_cin?Milk_Counter_Inc;Milk_Counter=Milk_Counter_Inc;
+
 		if
-		:: ((controller_state.state == controller_state_another)) -> controller_state.state = controller_state_another;
+		// TRANSITION Milk_Counter_SRS_1
+		::
+			 ((Milk_Counter == Milk_Counter_Inc) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 1; 
+		// TRANSITION Milk_Counter_SRS_2
+		::
+			 ((Milk_Counter == Milk_Counter_Inc) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 2; 
+		// TRANSITION Milk_Counter_SRS_3
+		::
+			 ((Milk_Counter == Milk_Counter_Inc) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 3; 
+		// TRANSITION Milk_Counter_SRS_4
+		::
+			 ((Milk_Counter == Milk_Counter_Inc) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 4; 
+		// TRANSITION Milk_Counter_SRS_5
+		::
+			 ((Milk_Counter == Milk_Counter_Inc) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 5; 
+		// TRANSITION Milk_Counter_SRS_6
+		::
+			 ((Milk_Counter == Milk_Counter_Inc) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 6; 
+		// TRANSITION Milk_Counter_SRS_7
+		::
+			 ((Milk_Counter == Milk_Counter_Inc) && (Milk_Counter_value ==)
+			->
+			Milk_Counter_value = 7; 
 		fi;
-	::action_channel?action_dec_milk;
+
+
+	// TRIGGER
+	::
+		Coffee_Counter_cin?Coffee_Counter_Dec;Coffee_Counter=Coffee_Counter_Dec;
+
 		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_latte) && (action.state == action_dec_milk)) -> milk_counter.state = milk_counter_dec; milk_counter_channel!milk_counter_dec;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_mocha) && (action.state == action_dec_milk)) -> milk_counter.state = milk_counter_dec; milk_counter_channel!milk_counter_dec;
+		// TRANSITION Coffee_Counter_SRS_8
+		::
+			 ((Coffee_Counter == Coffee_Counter_Dec) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 0; 
+		// TRANSITION Coffee_Counter_SRS_9
+		::
+			 ((Coffee_Counter == Coffee_Counter_Dec) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 1; 
+		// TRANSITION Coffee_Counter_SRS_10
+		::
+			 ((Coffee_Counter == Coffee_Counter_Dec) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 2; 
+		// TRANSITION Coffee_Counter_SRS_11
+		::
+			 ((Coffee_Counter == Coffee_Counter_Dec) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 3; 
+		// TRANSITION Coffee_Counter_SRS_12
+		::
+			 ((Coffee_Counter == Coffee_Counter_Dec) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 4; 
+		// TRANSITION Coffee_Counter_SRS_13
+		::
+			 ((Coffee_Counter == Coffee_Counter_Dec) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 5; 
+		// TRANSITION Coffee_Counter_SRS_14
+		::
+			 ((Coffee_Counter == Coffee_Counter_Dec) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 6; 
 		fi;
-	::sugar_counter_channel?sugar_counter_inc;
+
+
+	// TRIGGER
+	::
+		Coffee_Counter_cin?Coffee_Counter_Inc;Coffee_Counter=Coffee_Counter_Inc;
+
 		if
-		:: ((sugar_counter.state == sugar_counter_inc) && (sugar_counter.value == 0)) -> sugar_counter.state = sugar_counter_inc; sugar_counter.value = 1;
-		:: ((sugar_counter.state == sugar_counter_inc) && (sugar_counter.value == 1)) -> sugar_counter.state = sugar_counter_inc; sugar_counter.value = 2;
-		:: ((sugar_counter.state == sugar_counter_inc) && (sugar_counter.value == 2)) -> sugar_counter.state = sugar_counter_inc; sugar_counter.value = 3;
-		:: ((sugar_counter.state == sugar_counter_inc) && (sugar_counter.value == 3)) -> sugar_counter.state = sugar_counter_inc; sugar_counter.value = 4;
-		:: ((sugar_counter.state == sugar_counter_inc) && (sugar_counter.value == 4)) -> sugar_counter.state = sugar_counter_inc; sugar_counter.value = 5;
-		:: ((sugar_counter.state == sugar_counter_inc) && (sugar_counter.value == 5)) -> sugar_counter.state = sugar_counter_inc; sugar_counter.value = 6;
-		:: ((sugar_counter.state == sugar_counter_inc) && (sugar_counter.value == 6)) -> sugar_counter.state = sugar_counter_inc; sugar_counter.value = 7;
-		:: ((sugar_counter.state == sugar_counter_inc) && (sugar_counter.value == 7)) -> sugar_counter.state = sugar_counter_inc; sugar_counter.value = 7;
+		// TRANSITION Coffee_Counter_SRS_1
+		::
+			 ((Coffee_Counter == Coffee_Counter_Inc) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 1; 
+		// TRANSITION Coffee_Counter_SRS_2
+		::
+			 ((Coffee_Counter == Coffee_Counter_Inc) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 2; 
+		// TRANSITION Coffee_Counter_SRS_3
+		::
+			 ((Coffee_Counter == Coffee_Counter_Inc) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 3; 
+		// TRANSITION Coffee_Counter_SRS_4
+		::
+			 ((Coffee_Counter == Coffee_Counter_Inc) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 4; 
+		// TRANSITION Coffee_Counter_SRS_5
+		::
+			 ((Coffee_Counter == Coffee_Counter_Inc) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 5; 
+		// TRANSITION Coffee_Counter_SRS_6
+		::
+			 ((Coffee_Counter == Coffee_Counter_Inc) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 6; 
+		// TRANSITION Coffee_Counter_SRS_7
+		::
+			 ((Coffee_Counter == Coffee_Counter_Inc) && (Coffee_Counter_value ==)
+			->
+			Coffee_Counter_value = 7; 
 		fi;
-	::coffee_type_channel?coffee_type_mocha;
+
+
+	// TRIGGER
+	::
+		Another_Timer_cin?Another_Timer_Timeout;Another_Timer=Another_Timer_Timeout;
+
 		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_mocha)) -> sugar_counter.value = 3; milk_counter.value = 3; coffee_counter.value = 4;
+		// TRANSITION CONTROLLER_SRS_31
+		::
+			 ((Another_Timer == Another_Timer_Timeout) && (Controller_State == Controller_State_Anoth)
+			->
+			Controller_State_cout!Controller_State_Select; 
+		// TRANSITION Another_Timer_SRS_3
+		::
+			 ((Another_Timer == Another_Timer_Timeo)
+			->
+			Another_Timer_cout!Another_Timer_Stop; 
 		fi;
-	::sugar_counter_channel?sugar_counter_dec;
+
+
+	// TRIGGER
+	::
+		Another_Timer_cin?Another_Timer_Stop;Another_Timer=Another_Timer_Stop;
+
+
+
+	// TRIGGER
+	::
+		Another_Timer_cin?Another_Timer_Start;Another_Timer=Another_Timer_Start;
+
 		if
-		:: ((sugar_counter.state == sugar_counter_dec) && (sugar_counter.value == 0)) -> sugar_counter.state = sugar_counter_dec; sugar_counter.value = 0;
-		:: ((sugar_counter.state == sugar_counter_dec) && (sugar_counter.value == 1)) -> sugar_counter.state = sugar_counter_dec; sugar_counter.value = 0;
-		:: ((sugar_counter.state == sugar_counter_dec) && (sugar_counter.value == 2)) -> sugar_counter.state = sugar_counter_dec; sugar_counter.value = 1;
-		:: ((sugar_counter.state == sugar_counter_dec) && (sugar_counter.value == 3)) -> sugar_counter.state = sugar_counter_dec; sugar_counter.value = 2;
-		:: ((sugar_counter.state == sugar_counter_dec) && (sugar_counter.value == 4)) -> sugar_counter.state = sugar_counter_dec; sugar_counter.value = 3;
-		:: ((sugar_counter.state == sugar_counter_dec) && (sugar_counter.value == 5)) -> sugar_counter.state = sugar_counter_dec; sugar_counter.value = 4;
-		:: ((sugar_counter.state == sugar_counter_dec) && (sugar_counter.value == 6)) -> sugar_counter.state = sugar_counter_dec; sugar_counter.value = 5;
-		:: ((sugar_counter.state == sugar_counter_dec) && (sugar_counter.value == 7)) -> sugar_counter.state = sugar_counter_dec; sugar_counter.value = 6;
+		// TRANSITION Another_Timer_SRS_1
+		::
+			 ((Another_Timer == Another_Timer_Sta)
+			->
+			Another_Timer_cout!Another_Timer_Running; 
 		fi;
-	::pos_state_channel?pos_state_failed;
+
+
+	// TRIGGER
+	::
+		Another_Timer_cin?Another_Timer_Running;Another_Timer=Another_Timer_Running;
+
+
+
+	// TRIGGER
+	::
+		Producer_State_cin?Producer_State_Take;Producer_State=Producer_State_Take;
+
 		if
-		:: ((controller_state.state == controller_state_pos) && (pos_state.state == pos_state_failed)) -> controller_state.state = controller_state_select; controller_state_channel!controller_state_select;
+		// TRANSITION CONTROLLER_SRS_34
+		::
+			 ((Producer_State == Producer_State_Ta)
+			->
+			Controller_State_cout!Controller_State_Another; 
 		fi;
-	::another_timer_channel?another_timer_start;
+
+
+	// TRIGGER
+	::
+		Producer_State_cin?Producer_State_Producing;Producer_State=Producer_State_Producing;
+
+
+
+	// TRIGGER
+	::
+		Producer_State_cin?Producer_State_Produced;Producer_State=Producer_State_Produced;
+
+
+
+	// TRIGGER
+	::
+		POS_State_cin?POS_State_Paid;POS_State=POS_State_Paid;
+
 		if
-		:: ((another_timer.state == another_timer_start)) -> another_timer.state = another_timer_running;
+		// TRANSITION CONTROLLER_SRS_32
+		::
+			 ((Controller_State == Controller_State_POS) && (POS_State == POS_State_Pa)
+			->
+			Controller_State_cout!Controller_State_Produce; 
 		fi;
-	::action_channel?action_another_yes;
+
+
+	// TRIGGER
+	::
+		POS_State_cin?POS_State_Idle;POS_State=POS_State_Idle;
+
+
+
+	// TRIGGER
+	::
+		POS_State_cin?POS_State_Failed;POS_State=POS_State_Failed;
+
 		if
-		:: ((controller_state.state == controller_state_another) && (action.state == action_another_yes)) -> controller_state.state = controller_state_info; controller_state_channel!controller_state_info; another_timer.state = another_timer_start; another_timer_channel!another_timer_start;
+		// TRANSITION CONTROLLER_SRS_33
+		::
+			 ((Controller_State == Controller_State_POS) && (POS_State == POS_State_Fail)
+			->
+			Controller_State_cout!Controller_State_Select; 
 		fi;
-	::action_channel?action_another_no;
+
+
+	// TRIGGER
+	::
+		POS_State_cin?POS_State_Working;POS_State=POS_State_Working;
+
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Take;Action=Action_Take;
+
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Select_Mocha;Action=Action_Select_Mocha;
+
 		if
-		:: ((controller_state.state == controller_state_another) && (action.state == action_another_no)) -> controller_state.state = controller_state_select; controller_state_channel!controller_state_select; another_timer.state = another_timer_stop; another_timer_channel!another_timer_stop;
+		// TRANSITION CONTROLLER_SRS_4
+		::
+			 ((Controller_State == Controller_State_Select) && (Action == Action_Select_Moc)
+			->
+			Controller_State_cout!Controller_State_Info; Coffee_Type_cout!Coffee_Type_Mocha; 
 		fi;
-	::producer_state_channel?producer_state_take;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_POS_Failed;Action=Action_POS_Failed;
+
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Another_Yes;Action=Action_Another_Yes;
+
 		if
-		:: ((producer_state.state == producer_state_take)) -> controller_state.state = controller_state_another; controller_state_channel!controller_state_another;
+		// TRANSITION CONTROLLER_SRS_29
+		::
+			 ((Controller_State == Controller_State_Another) && (Action == Action_Another_Y)
+			->
+			Another_Timer_cout!Another_Timer_Start; Controller_State_cout!Controller_State_Info; 
 		fi;
-	::controller_state_channel?controller_state_produce;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_POS_Paid;Action=Action_POS_Paid;
+
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Produce_Ok;Action=Action_Produce_Ok;
+
 		if
-		:: ((controller_state.state == controller_state_produce)) -> controller_state.state = controller_state_produce;
+		// TRANSITION CONTROLLER_SRS_27
+		::
+			 ((Controller_State == Controller_State_Info) && (Action == Action_Produce_)
+			->
+			Controller_State_cout!Controller_State_POS; 
 		fi;
-	::action_channel?action_select_americano;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Produce_Cancel;Action=Action_Produce_Cancel;
+
 		if
-		:: ((controller_state.state == controller_state_select) && (action.state == action_select_americano)) -> controller_state.state = controller_state_info; controller_state_channel!controller_state_info; coffee_type.state = coffee_type_americano; coffee_type_channel!coffee_type_americano;
+		// TRANSITION CONTROLLER_SRS_28
+		::
+			 ((Controller_State == Controller_State_Info) && (Action == Action_Produce_Canc)
+			->
+			Controller_State_cout!Controller_State_Select; 
 		fi;
-	::action_channel?action_inc_coffee;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Inc_Coffee;Action=Action_Inc_Coffee;
+
 		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_espresso) && (action.state == action_inc_coffee)) -> coffee_counter.state = coffee_counter_inc; coffee_counter_channel!coffee_counter_inc;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_americano) && (action.state == action_inc_coffee)) -> coffee_counter.state = coffee_counter_inc; coffee_counter_channel!coffee_counter_inc;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_latte) && (action.state == action_inc_coffee)) -> coffee_counter.state = coffee_counter_inc; coffee_counter_channel!coffee_counter_inc;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_mocha) && (action.state == action_inc_coffee)) -> coffee_counter.state = coffee_counter_inc; coffee_counter_channel!coffee_counter_inc;
+		// TRANSITION CONTROLLER_SRS_9
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Espresso) && (Action == Action_Inc_Coff)
+			->
+			Coffee_Counter_cout!Coffee_Counter_Inc; 
+		// TRANSITION CONTROLLER_SRS_10
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Americano) && (Action == Action_Inc_Coff)
+			->
+			Coffee_Counter_cout!Coffee_Counter_Inc; 
+		// TRANSITION CONTROLLER_SRS_11
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Latte) && (Action == Action_Inc_Coff)
+			->
+			Coffee_Counter_cout!Coffee_Counter_Inc; 
+		// TRANSITION CONTROLLER_SRS_12
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Mocha) && (Action == Action_Inc_Coff)
+			->
+			Coffee_Counter_cout!Coffee_Counter_Inc; 
 		fi;
-	::action_channel?action_select_espresso;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Select_Espresso;Action=Action_Select_Espresso;
+
 		if
-		:: ((controller_state.state == controller_state_select) && (action.state == action_select_espresso)) -> controller_state.state = controller_state_info; controller_state_channel!controller_state_info; coffee_type.state = coffee_type_espresso; coffee_type_channel!coffee_type_espresso;
+		// TRANSITION CONTROLLER_SRS_1
+		::
+			 ((Controller_State == Controller_State_Select) && (Action == Action_Select_Espres)
+			->
+			Controller_State_cout!Controller_State_Info; Coffee_Type_cout!Coffee_Type_Espresso; 
 		fi;
-	::controller_state_channel?controller_state_select;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Select_Latte;Action=Action_Select_Latte;
+
 		if
-		:: ((controller_state.state == controller_state_select)) -> controller_state.state = controller_state_select;
+		// TRANSITION CONTROLLER_SRS_3
+		::
+			 ((Controller_State == Controller_State_Select) && (Action == Action_Select_Lat)
+			->
+			Controller_State_cout!Controller_State_Info; Coffee_Type_cout!Coffee_Type_Latte; 
 		fi;
-	::milk_counter_channel?milk_counter_inc;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Dec_Milk;Action=Action_Dec_Milk;
+
 		if
-		:: ((milk_counter.state == milk_counter_inc) && (milk_counter.value == 0)) -> milk_counter.state = milk_counter_inc; milk_counter.value = 1;
-		:: ((milk_counter.state == milk_counter_inc) && (milk_counter.value == 1)) -> milk_counter.state = milk_counter_inc; milk_counter.value = 2;
-		:: ((milk_counter.state == milk_counter_inc) && (milk_counter.value == 2)) -> milk_counter.state = milk_counter_inc; milk_counter.value = 3;
-		:: ((milk_counter.state == milk_counter_inc) && (milk_counter.value == 3)) -> milk_counter.state = milk_counter_inc; milk_counter.value = 4;
-		:: ((milk_counter.state == milk_counter_inc) && (milk_counter.value == 4)) -> milk_counter.state = milk_counter_inc; milk_counter.value = 5;
-		:: ((milk_counter.state == milk_counter_inc) && (milk_counter.value == 5)) -> milk_counter.state = milk_counter_inc; milk_counter.value = 6;
-		:: ((milk_counter.state == milk_counter_inc) && (milk_counter.value == 6)) -> milk_counter.state = milk_counter_inc; milk_counter.value = 7;
-		:: ((milk_counter.state == milk_counter_inc) && (milk_counter.value == 7)) -> milk_counter.state = milk_counter_inc; milk_counter.value = 7;
+		// TRANSITION CONTROLLER_SRS_25
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Latte) && (Action == Action_Dec_Mi)
+			->
+			Milk_Counter_cout!Milk_Counter_Dec; 
+		// TRANSITION CONTROLLER_SRS_26
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Mocha) && (Action == Action_Dec_Mi)
+			->
+			Milk_Counter_cout!Milk_Counter_Dec; 
 		fi;
-	::action_channel?action_inc_milk;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Another_No;Action=Action_Another_No;
+
 		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_latte) && (action.state == action_inc_milk)) -> milk_counter.state = milk_counter_inc; milk_counter_channel!milk_counter_inc;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_mocha) && (action.state == action_inc_milk)) -> milk_counter.state = milk_counter_inc; milk_counter_channel!milk_counter_inc;
+		// TRANSITION CONTROLLER_SRS_30
+		::
+			 ((Controller_State == Controller_State_Another) && (Action == Action_Another_)
+			->
+			Another_Timer_cout!Another_Timer_Stop; Controller_State_cout!Controller_State_Select; 
 		fi;
-	::coffee_counter_channel?coffee_counter_inc;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Dec_Coffee;Action=Action_Dec_Coffee;
+
 		if
-		:: ((coffee_counter.state == coffee_counter_inc) && (coffee_counter.value == 0)) -> coffee_counter.state = coffee_counter_inc; coffee_counter.value = 1;
-		:: ((coffee_counter.state == coffee_counter_inc) && (coffee_counter.value == 1)) -> coffee_counter.state = coffee_counter_inc; coffee_counter.value = 2;
-		:: ((coffee_counter.state == coffee_counter_inc) && (coffee_counter.value == 2)) -> coffee_counter.state = coffee_counter_inc; coffee_counter.value = 3;
-		:: ((coffee_counter.state == coffee_counter_inc) && (coffee_counter.value == 3)) -> coffee_counter.state = coffee_counter_inc; coffee_counter.value = 4;
-		:: ((coffee_counter.state == coffee_counter_inc) && (coffee_counter.value == 4)) -> coffee_counter.state = coffee_counter_inc; coffee_counter.value = 5;
-		:: ((coffee_counter.state == coffee_counter_inc) && (coffee_counter.value == 5)) -> coffee_counter.state = coffee_counter_inc; coffee_counter.value = 6;
-		:: ((coffee_counter.state == coffee_counter_inc) && (coffee_counter.value == 6)) -> coffee_counter.state = coffee_counter_inc; coffee_counter.value = 7;
-		:: ((coffee_counter.state == coffee_counter_inc) && (coffee_counter.value == 7)) -> coffee_counter.state = coffee_counter_inc; coffee_counter.value = 7;
+		// TRANSITION CONTROLLER_SRS_13
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Espresso) && (Action == Action_Dec_Coff)
+			->
+			Coffee_Counter_cout!Coffee_Counter_Dec; 
+		// TRANSITION CONTROLLER_SRS_14
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Americano) && (Action == Action_Dec_Coff)
+			->
+			Coffee_Counter_cout!Coffee_Counter_Dec; 
+		// TRANSITION CONTROLLER_SRS_15
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Latte) && (Action == Action_Dec_Coff)
+			->
+			Coffee_Counter_cout!Coffee_Counter_Dec; 
+		// TRANSITION CONTROLLER_SRS_16
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Mocha) && (Action == Action_Dec_Coff)
+			->
+			Coffee_Counter_cout!Coffee_Counter_Dec; 
 		fi;
-	::action_channel?action_select_latte;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Select_Americano;Action=Action_Select_Americano;
+
 		if
-		:: ((controller_state.state == controller_state_select) && (action.state == action_select_latte)) -> controller_state.state = controller_state_info; controller_state_channel!controller_state_info; coffee_type.state = coffee_type_latte; coffee_type_channel!coffee_type_latte;
+		// TRANSITION CONTROLLER_SRS_2
+		::
+			 ((Controller_State == Controller_State_Select) && (Action == Action_Select_America)
+			->
+			Controller_State_cout!Controller_State_Info; Coffee_Type_cout!Coffee_Type_Americano; 
 		fi;
-	::coffee_type_channel?coffee_type_mocha;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Inc_Milk;Action=Action_Inc_Milk;
+
 		if
-		:: ((coffee_type.state == coffee_type_mocha)) -> coffee_type.state = coffee_type_mocha;
+		// TRANSITION CONTROLLER_SRS_23
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Latte) && (Action == Action_Inc_Mi)
+			->
+			Milk_Counter_cout!Milk_Counter_Inc; 
+		// TRANSITION CONTROLLER_SRS_24
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Mocha) && (Action == Action_Inc_Mi)
+			->
+			Milk_Counter_cout!Milk_Counter_Inc; 
 		fi;
-	::action_channel?action_produce_ok;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Dec_Sugar;Action=Action_Dec_Sugar;
+
 		if
-		:: ((controller_state.state == controller_state_info) && (action.state == action_produce_ok)) -> controller_state.state = controller_state_pos; controller_state_channel!controller_state_pos;
+		// TRANSITION CONTROLLER_SRS_20
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Americano) && (Action == Action_Dec_Sug)
+			->
+			Sugar_Counter_cout!Sugar_Counter_Dec; 
+		// TRANSITION CONTROLLER_SRS_21
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Latte) && (Action == Action_Dec_Sug)
+			->
+			Sugar_Counter_cout!Sugar_Counter_Dec; 
+		// TRANSITION CONTROLLER_SRS_22
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Mocha) && (Action == Action_Dec_Sug)
+			->
+			Sugar_Counter_cout!Sugar_Counter_Dec; 
 		fi;
-	::coffee_type_channel?coffee_type_espresso;
+
+
+	// TRIGGER
+	::
+		Action_cin?Action_Inc_Sugar;Action=Action_Inc_Sugar;
+
 		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_espresso)) -> sugar_counter.value = 0; milk_counter.value = 0; coffee_counter.value = 7;
-		:: ((coffee_type.state == coffee_type_espresso)) -> coffee_type.state = coffee_type_espresso;
+		// TRANSITION CONTROLLER_SRS_17
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Americano) && (Action == Action_Inc_Sug)
+			->
+			Sugar_Counter_cout!Sugar_Counter_Inc; 
+		// TRANSITION CONTROLLER_SRS_18
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Latte) && (Action == Action_Inc_Sug)
+			->
+			Sugar_Counter_cout!Sugar_Counter_Inc; 
+		// TRANSITION CONTROLLER_SRS_19
+		::
+			 ((Controller_State == Controller_State_Info) && (Coffee_Type == Coffee_Type_Mocha) && (Action == Action_Inc_Sug)
+			->
+			Sugar_Counter_cout!Sugar_Counter_Inc; 
 		fi;
-	::action_channel?action_dec_coffee;
-		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_espresso) && (action.state == action_dec_coffee)) -> coffee_counter.state = coffee_counter_dec; coffee_counter_channel!coffee_counter_dec;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_americano) && (action.state == action_dec_coffee)) -> coffee_counter.state = coffee_counter_dec; coffee_counter_channel!coffee_counter_dec;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_latte) && (action.state == action_dec_coffee)) -> coffee_counter.state = coffee_counter_dec; coffee_counter_channel!coffee_counter_dec;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_mocha) && (action.state == action_dec_coffee)) -> coffee_counter.state = coffee_counter_dec; coffee_counter_channel!coffee_counter_dec;
-		fi;
-	::coffee_counter_channel?coffee_counter_dec;
-		if
-		:: ((coffee_counter.state == coffee_counter_dec) && (coffee_counter.value == 0)) -> coffee_counter.state = coffee_counter_dec; coffee_counter.value = 0;
-		:: ((coffee_counter.state == coffee_counter_dec) && (coffee_counter.value == 1)) -> coffee_counter.state = coffee_counter_dec; coffee_counter.value = 0;
-		:: ((coffee_counter.state == coffee_counter_dec) && (coffee_counter.value == 2)) -> coffee_counter.state = coffee_counter_dec; coffee_counter.value = 1;
-		:: ((coffee_counter.state == coffee_counter_dec) && (coffee_counter.value == 3)) -> coffee_counter.state = coffee_counter_dec; coffee_counter.value = 2;
-		:: ((coffee_counter.state == coffee_counter_dec) && (coffee_counter.value == 4)) -> coffee_counter.state = coffee_counter_dec; coffee_counter.value = 3;
-		:: ((coffee_counter.state == coffee_counter_dec) && (coffee_counter.value == 5)) -> coffee_counter.state = coffee_counter_dec; coffee_counter.value = 4;
-		:: ((coffee_counter.state == coffee_counter_dec) && (coffee_counter.value == 6)) -> coffee_counter.state = coffee_counter_dec; coffee_counter.value = 5;
-		:: ((coffee_counter.state == coffee_counter_dec) && (coffee_counter.value == 7)) -> coffee_counter.state = coffee_counter_dec; coffee_counter.value = 6;
-		fi;
-	::action_channel?action_produce_cancel;
-		if
-		:: ((controller_state.state == controller_state_info) && (action.state == action_produce_cancel)) -> controller_state.state = controller_state_select; controller_state_channel!controller_state_select;
-		fi;
-	::action_channel?action_select_mocha;
-		if
-		:: ((controller_state.state == controller_state_select) && (action.state == action_select_mocha)) -> controller_state.state = controller_state_info; controller_state_channel!controller_state_info; coffee_type.state = coffee_type_mocha; coffee_type_channel!coffee_type_mocha;
-		fi;
-	::milk_counter_channel?milk_counter_dec;
-		if
-		:: ((milk_counter.state == milk_counter_dec) && (milk_counter.value == 0)) -> milk_counter.state = milk_counter_dec; milk_counter.value = 0;
-		:: ((milk_counter.state == milk_counter_dec) && (milk_counter.value == 1)) -> milk_counter.state = milk_counter_dec; milk_counter.value = 0;
-		:: ((milk_counter.state == milk_counter_dec) && (milk_counter.value == 2)) -> milk_counter.state = milk_counter_dec; milk_counter.value = 1;
-		:: ((milk_counter.state == milk_counter_dec) && (milk_counter.value == 3)) -> milk_counter.state = milk_counter_dec; milk_counter.value = 2;
-		:: ((milk_counter.state == milk_counter_dec) && (milk_counter.value == 4)) -> milk_counter.state = milk_counter_dec; milk_counter.value = 3;
-		:: ((milk_counter.state == milk_counter_dec) && (milk_counter.value == 5)) -> milk_counter.state = milk_counter_dec; milk_counter.value = 4;
-		:: ((milk_counter.state == milk_counter_dec) && (milk_counter.value == 6)) -> milk_counter.state = milk_counter_dec; milk_counter.value = 5;
-		:: ((milk_counter.state == milk_counter_dec) && (milk_counter.value == 7)) -> milk_counter.state = milk_counter_dec; milk_counter.value = 6;
-		fi;
-	::action_channel?action_inc_sugar;
-		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_americano) && (action.state == action_inc_sugar)) -> sugar_counter.state = sugar_counter_inc; sugar_counter_channel!sugar_counter_inc;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_latte) && (action.state == action_inc_sugar)) -> sugar_counter.state = sugar_counter_inc; sugar_counter_channel!sugar_counter_inc;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_mocha) && (action.state == action_inc_sugar)) -> sugar_counter.state = sugar_counter_inc; sugar_counter_channel!sugar_counter_inc;
-		fi;
-	::action_channel?action_dec_sugar;
-		if
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_americano) && (action.state == action_dec_sugar)) -> sugar_counter.state = sugar_counter_dec; sugar_counter_channel!sugar_counter_dec;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_latte) && (action.state == action_dec_sugar)) -> sugar_counter.state = sugar_counter_dec; sugar_counter_channel!sugar_counter_dec;
-		:: ((controller_state.state == controller_state_info) && (coffee_type.state == coffee_type_mocha) && (action.state == action_dec_sugar)) -> sugar_counter.state = sugar_counter_dec; sugar_counter_channel!sugar_counter_dec;
-		fi;
+	::if
+	// NO TRIG TRANSITION Another_Timer_SRS_2
+	:: ((Another_Timer == Another_Timer_Runni)
+			->
+			Another_Timer_cout!Another_Timer_Timeout; 
+	fi;
 	od;
 };
+
+active proctype CONTROLLER_environment(){
+	do
+	::Producer_State_cin!Producer_State_Take;
+	::Producer_State_cin!Producer_State_Producing;
+	::Producer_State_cin!Producer_State_Produced;
+
+	::POS_State_cin!POS_State_Paid;
+	::POS_State_cin!POS_State_Idle;
+	::POS_State_cin!POS_State_Failed;
+	::POS_State_cin!POS_State_Working;
+
+	::Action_cin!Action_Take;
+	::Action_cin!Action_Select_Mocha;
+	::Action_cin!Action_POS_Failed;
+	::Action_cin!Action_Another_Yes;
+	::Action_cin!Action_POS_Paid;
+	::Action_cin!Action_Produce_Ok;
+	::Action_cin!Action_Produce_Cancel;
+	::Action_cin!Action_Inc_Coffee;
+	::Action_cin!Action_Select_Espresso;
+	::Action_cin!Action_Select_Latte;
+	::Action_cin!Action_Dec_Milk;
+	::Action_cin!Action_Another_No;
+	::Action_cin!Action_Dec_Coffee;
+	::Action_cin!Action_Select_Americano;
+	::Action_cin!Action_Inc_Milk;
+	::Action_cin!Action_Dec_Sugar;
+	::Action_cin!Action_Inc_Sugar;
+
+
+	::Controller_State_cout?Controller_State_POS;Controller_State_cin!Controller_State_POS;
+	::Controller_State_cout?Controller_State_Produce;Controller_State_cin!Controller_State_Produce;
+	::Controller_State_cout?Controller_State_Another;Controller_State_cin!Controller_State_Another;
+	::Controller_State_cout?Controller_State_Select;Controller_State_cin!Controller_State_Select;
+	::Controller_State_cout?Controller_State_Info;Controller_State_cin!Controller_State_Info;
+
+	::Coffee_Type_cout?Coffee_Type_Americano;Coffee_Type_cin!Coffee_Type_Americano;
+	::Coffee_Type_cout?Coffee_Type_Espresso;Coffee_Type_cin!Coffee_Type_Espresso;
+	::Coffee_Type_cout?Coffee_Type_Latte;Coffee_Type_cin!Coffee_Type_Latte;
+	::Coffee_Type_cout?Coffee_Type_Mocha;Coffee_Type_cin!Coffee_Type_Mocha;
+
+	::Sugar_Counter_cout?Sugar_Counter_Inc;Sugar_Counter_cin!Sugar_Counter_Inc;
+	::Sugar_Counter_cout?Sugar_Counter_Dec;Sugar_Counter_cin!Sugar_Counter_Dec;
+
+	::Milk_Counter_cout?Milk_Counter_Dec;Milk_Counter_cin!Milk_Counter_Dec;
+	::Milk_Counter_cout?Milk_Counter_Inc;Milk_Counter_cin!Milk_Counter_Inc;
+
+	::Coffee_Counter_cout?Coffee_Counter_Dec;Coffee_Counter_cin!Coffee_Counter_Dec;
+	::Coffee_Counter_cout?Coffee_Counter_Inc;Coffee_Counter_cin!Coffee_Counter_Inc;
+
+	::Another_Timer_cout?Another_Timer_Timeout;Another_Timer_cin!Another_Timer_Timeout;
+	::Another_Timer_cout?Another_Timer_Stop;Another_Timer_cin!Another_Timer_Stop;
+	::Another_Timer_cout?Another_Timer_Start;Another_Timer_cin!Another_Timer_Start;
+	::Another_Timer_cout?Another_Timer_Running;Another_Timer_cin!Another_Timer_Running;
+
+	od;
+}

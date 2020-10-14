@@ -8,11 +8,11 @@ import java.util.ArrayList;
 
 public class Transition {
 	private String id;
-	private Action trigger;
+	private ReadAction trigger;
 	private ArrayList<Guard> guards;
 	private ArrayList<Action> effects;
 
-	public Transition(@NotNull String id, @Nullable Action trigger, @NotNull ArrayList<Guard> guards, @NotNull ArrayList<Action> effects) {
+	public Transition(@NotNull String id, @Nullable ReadAction trigger, @NotNull ArrayList<Guard> guards, @NotNull ArrayList<Action> effects) {
 		this.id = id;
 		this.trigger = trigger;
 		this.guards = guards;
@@ -27,18 +27,18 @@ public class Transition {
 			toReturn.append("true");
 		} else {
 			for (Guard guard : this.guards) {
-				toReturn.append(guard).append(" && \n\t\t");
+				toReturn.append(guard).append(" && ");
 			}
 			toReturn.delete(toReturn.length() - 7, toReturn.length());
 		}
-		toReturn.append(")\n\t\t->\n");
+		toReturn.append(")\n\t\t\t->\n\t\t\t");
 		for (Action action : this.effects) {
-			toReturn.append("\t\t").append(action).append("\n");
+			toReturn.append(action).append(" ");
 		}
 		return toReturn.toString();
 	}
 
-	public Action getTrigger() {
+	public ReadAction getTrigger() {
 		return this.trigger;
 	}
 

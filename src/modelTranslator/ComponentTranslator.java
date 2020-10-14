@@ -1,24 +1,31 @@
 package modelTranslator;
 
 import model.*;
-import utils.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ComponentTranslator {
-	public static String getName(Component component) {
-		return component.getName().toLowerCase();
+	private static HashMap<Component, String> translations;
+
+	static {
+		translations = new HashMap<>();
 	}
 
 	public static String translate(Component component) {
+		if (translations.containsKey(component)) {
+			return translations.get(component);
+		}
 		StringBuilder modelBuilder = new StringBuilder();
-
-		modelBuilder.append("#define N 12\n\n");
-
+		modelBuilder.append(
+				"mtype = {\n"
+		);
 		for (Parameter parameter : component.getParameters()) {
 			modelBuilder.append(ParameterTranslator.translate(parameter));
+			modelBuilder.append(",\n");
 		}
+		modelBuilder.delete(modelBuilder.length() - 2, modelBuilder.length());
+		modelBuilder.append("\n}\n\n");
 		for (Channel channel : component.getChannels()) {
 			modelBuilder.append(ChannelTranslator.translate(channel));
 		}
@@ -26,7 +33,8 @@ public class ComponentTranslator {
 
 		for (Parameter parameter : component.getParameters()) {
 			String parameterName = parameter.getName();
-			String parameterTypedefName = parameterName + "_states";
+//			String parameterTypedefName = parameterName + "_states"; TODO
+			String parameterTypedefName = "mtype";
 			modelBuilder.append(parameterTypedefName);
 			modelBuilder.append(" ");
 			modelBuilder.append(parameterName);
@@ -40,54 +48,55 @@ public class ComponentTranslator {
 		}
 		modelBuilder.append("\n\nactive proctype ");
 
-		modelBuilder.append(getName(component));
+		modelBuilder.append(component.getName());
 		modelBuilder.append(" (){\n");
 		modelBuilder.append("\tdo\n");
-		ArrayList<Action> actions = component.getReadActions();
-		HashMap<Action, ArrayList<Transition>> body = new HashMap<>();
-		for (Action action : actions) {
+		ArrayList<ReadAction> readActions = component.getReadActions();
+		HashMap<ReadAction, ArrayList<Transition>> body = new HashMap<>();
+		ArrayList<Transition> noTriggers = new ArrayList<>();
+		for (ReadAction action : readActions) {
 			body.put(action, new ArrayList<>());
 		}
 		for (Transition transition : component.getTransitions()) {
-			if(transition.getTrigger()!=null){
+			if (transition.getTrigger() != null) {
 				body.get(transition.getTrigger()).add(transition);
-			}else {
-				Log.warning("transition passed");
+			} else {
+				noTriggers.add(transition);
 			}
 
 		}
-		for (Action action : actions) {
+		for (ReadAction readAction : readActions) {
 			modelBuilder.append("\n\n\t// TRIGGER\n");
-			modelBuilder.append("\t:: ").append(action).append("\n");
-			ArrayList<Transition> transitions = body.get(action);
+			modelBuilder.append("\t::\n\t\t");
+			modelBuilder.append(
+					String.format(
+							"%s;%s;\n\n",
+							readAction.toString(),
+							readAction.getAssignment()
+					)
+			);
+			ArrayList<Transition> transitions = body.get(readAction);
 			if (!transitions.isEmpty()) {
 				modelBuilder.append("\t\tif\n");
 				for (Transition transition : transitions) {
 					modelBuilder.append("\t\t// TRANSITION ").append(transition.getId()).append("\n");
-					modelBuilder.append("\t\t:: ").append(transition).append("\n");
+					modelBuilder.append("\t\t::\n\t\t\t ").append(transition).append("\n");
 				}
 				modelBuilder.append("\t\tfi;\n");
 			}
 		}
+		modelBuilder.append("\t::if\n");
+		for (Transition transition : noTriggers) {
+			modelBuilder.append("\t// NO TRIG TRANSITION ").append(transition.getId()).append("\n");
+			modelBuilder.append("\t:: ").append(transition).append("\n");
+		}
+		modelBuilder.append("\tfi;\n");
 		modelBuilder.append("\tod;\n");
 		modelBuilder.append("};\n\n");
-		return modelBuilder.toString();
+		modelBuilder.append(UniversalEnvironmentBuilder.buildFor(component));
+		translations.put(component, modelBuilder.toString());
+		return translate(component);
 	}
 
 
-	public static ArrayList<String> getInputInterfaceAlphabet(Component component) {
-		ArrayList<String> actions = new ArrayList<>();
-		for (Parameter parameter : component.getInputParameters()) {
-//			actions.addAll(ParameterTranslator.getReadActions(parameter));
-		}
-		return actions;
-	}
-
-	public static ArrayList<String> getOutputInterfaceAlphabet(Component component) {
-		ArrayList<String> actions = new ArrayList<>();
-		for (Parameter parameter : component.getOutputParameters()) {
-//			actions.addAll(ParameterTranslator.getWriteActions(parameter));
-		}
-		return actions;
-	}
 }

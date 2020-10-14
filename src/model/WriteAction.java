@@ -1,26 +1,19 @@
 package model;
 
 public class WriteAction extends Action {
-	private Evaluation evaluation;
+	private State state;
 
-	public WriteAction(Channel channel, Evaluation evaluation) {
+	public WriteAction(Channel channel, State state) {
 		super(channel);
-		this.evaluation = evaluation;
+		this.state = state;
 	}
 
 
-	public Evaluation getEvaluation() {
-		return this.evaluation;
+	public State getState() {
+		return this.state;
 	}
 
 	public String toString() {
-		String toReturn = "";
-		if (this.evaluation.getValue() != null) {
-			toReturn += this.getChannel().getParameter().getName() + "_value = " + this.evaluation.getValue() + ";";
-		}
-		if (this.getEvaluation().getState() != null) {
-			toReturn += this.getChannel() + "!" + this.evaluation.getState() + ";";
-		}
-		return toReturn;
+		return this.getChannel() + "!" + this.getState();
 	}
 }

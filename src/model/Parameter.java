@@ -118,10 +118,6 @@ public class Parameter {
 				return evaluation;
 			}
 		}
-		System.out.println("returning null eval\t" + evaluationString + "\t" + state + "\t" + value);
-		for (Evaluation evaluation : this.getEval()) {
-			System.out.println("EVAL\t" + evaluation.toString());
-		}
 		return null;
 	}
 

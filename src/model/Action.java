@@ -1,7 +1,10 @@
 package model;
 
-public abstract class Action {
+import net.automatalib.commons.util.nid.MutableNumericID;
+
+public abstract class Action implements MutableNumericID {
 	private Channel channel;
+	private int id;
 
 	public Action(Channel channel) {
 		this.channel = channel;
@@ -12,4 +15,13 @@ public abstract class Action {
 		return this.channel;
 	}
 
+	@Override
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	@Override
+	public int getId() {
+		return id;
+	}
 }

@@ -10,7 +10,6 @@ import modelReader.declaration.ParameterState;
 import modelReader.fileReaders.MergedIOReader;
 import modelReader.fileReaders.TransitionFileReader;
 import utils.Log;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,19 +66,13 @@ public class ModelReader {
 
 		}
 
-		for (File file : this.componentFolders) {
-			Component component = components.get(file.getName());
-			File[] subFolders = file.listFiles();
-			assert subFolders != null;
-			for (File subFile : subFolders) {
-				if (subFile.isDirectory() && subFile.getName().equals("requirements")) {
-					File[] requirementsFiles = subFile.listFiles();
-					assert requirementsFiles != null;
-					for (File requirementsFile : requirementsFiles) {
-						if (requirementsFile.getName().endsWith(".xlsx")) {
-							TransitionFileReader.read(requirementsFile, component);
-						}
-					}
+		for (File componentFolder : this.componentFolders) {
+			Component component = components.get(componentFolder.getName());
+			File[] requirementsFiles = componentFolder.listFiles();
+			assert requirementsFiles != null;
+			for (File requirementsFile : requirementsFiles) {
+				if (requirementsFile.getName().endsWith(".xlsx")) {
+					TransitionFileReader.read(requirementsFile, component);
 				}
 			}
 		}
@@ -149,7 +142,7 @@ public class ModelReader {
 		for (File transitionFile : transitionFiles) {
 			if (transitionFile.isDirectory() || !transitionFile.getName().endsWith(".xlsx")) {
 				Log.warning("Unused file " + transitionFile.getName());
-			}else {
+			} else {
 				this.transitionsFiles.add(transitionFile);
 			}
 		}

@@ -55,12 +55,28 @@ public class Component {
 		return this.transitions;
 	}
 
+	public ArrayList<Channel> getChannels() {
+		ArrayList<Channel> channels = new ArrayList<>(this.getInputChannels());
+		channels.addAll(this.getOutputChannels());
+		return channels;
+	}
+
 	public ArrayList<Channel> getInputChannels() {
 		ArrayList<Channel> toReturn = new ArrayList<>();
 		for (Parameter parameter : this.parameters) {
 			toReturn.add(parameter.getInputChannel());
 		}
 		return toReturn;
+	}
+
+	public Channel getInputChannel(Parameter parameter) {
+		ArrayList<Channel> inputChannels = this.getInputChannels();
+		for (Channel channel : inputChannels) {
+			if (channel.getParameter().equals(parameter)) {
+				return channel;
+			}
+		}
+		return null;
 	}
 
 	public ArrayList<Channel> getOutputChannels() {
@@ -71,16 +87,36 @@ public class Component {
 		return toReturn;
 	}
 
-	public ArrayList<Channel> getChannels() {
-		ArrayList<Channel> channels = new ArrayList<>(this.getInputChannels());
-		channels.addAll(this.getOutputChannels());
-		return channels;
+	public Channel getOutputChannel(Parameter parameter) {
+		ArrayList<Channel> outputChannels = this.getOutputChannels();
+		for (Channel channel : outputChannels) {
+			if (channel.getParameter().equals(parameter)) {
+				return channel;
+			}
+		}
+		return null;
 	}
 
-	public ArrayList<Action> getReadActions() {
+	public ArrayList<ReadAction> getReadActions() {
+		ArrayList<ReadAction> actions = new ArrayList<>();
+		for (Channel channel : this.getInputChannels()) {
+			actions.addAll(channel.getReadActions());
+		}
+		return actions;
+	}
+
+	public ArrayList<Action> getInputAlphabet() {
 		ArrayList<Action> actions = new ArrayList<>();
 		for (Channel channel : this.getInputChannels()) {
-			actions.addAll(channel.getActions());
+			actions.addAll(channel.getWriteActions());
+		}
+		return actions;
+	}
+
+	public ArrayList<Action> getOutputAlphabet() {
+		ArrayList<Action> actions = new ArrayList<>();
+		for (Channel channel : this.getOutputChannels()) {
+			actions.addAll(channel.getReadActions());
 		}
 		return actions;
 	}

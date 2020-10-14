@@ -50,7 +50,7 @@ public class TransitionFileReader {
 
 	private static void readTransition(Component destination) {
 		ArrayList<String> row = sheetReader.nextRow();
-		Action trigger = null;
+		ReadAction trigger = null;
 		ArrayList<Guard> guards = new ArrayList<>();
 		ArrayList<Action> effects = new ArrayList<>();
 		for (Parameter parameter : guardColumns.keySet()) {
@@ -61,7 +61,7 @@ public class TransitionFileReader {
 				guards.add(guard);
 				if (StringUtils.getGuardMode(guardCell) == Mode.T) {
 					Channel inputChannel = parameter.getInputChannel();
-					trigger = inputChannel.getActionByState(guard.getState());
+					trigger = inputChannel.getReadActionByState(guard.getState());
 				}
 			} else if (!guardCell.equals("N/A")) {
 				throw Error.combine(ErrorType.INVALID_GUARD, guardCell);
@@ -73,12 +73,7 @@ public class TransitionFileReader {
 			if (RegexChecker.isGuard(effectCell)) {
 				Channel outputChannel = parameter.getOutputChannel();
 				Evaluation evaluation = parameter.getEvaluation(effectCell);
-				Action effect = outputChannel.getActionByEvaluation(evaluation);
-				if(effect==null){
-					Log.error("effect cell\t"+effectCell);
-					Log.error("evaluation\t"+evaluation);
-					Log.error("channel\t"+outputChannel);
-				}
+				Action effect = outputChannel.getWriteActionByEvaluation(evaluation);
 				effects.add(effect);
 			} else if (!effectCell.equals("NO_CHANGE")) {
 				throw Error.combine(ErrorType.INVALID_EFFECT, effectCell);

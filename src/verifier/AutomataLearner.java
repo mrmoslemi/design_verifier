@@ -4,18 +4,17 @@ import de.learnlib.algorithms.lstar.dfa.ClassicLStarDFABuilder;
 import de.learnlib.algorithms.malerpnueli.MalerPnueliDFA;
 import de.learnlib.algorithms.malerpnueli.MalerPnueliDFABuilder;
 import de.learnlib.algorithms.rpni.BlueFringeRPNIDFA;
-import de.learnlib.api.oracle.MembershipOracle;
-import de.learnlib.api.query.Query;
+import model.Action;
 import model.Component;
-import modelTranslator.ComponentTranslator;
+import model.StringOracle;
 import net.automatalib.automata.fsa.DFA;
 import net.automatalib.words.Alphabet;
 import net.automatalib.words.Word;
 import net.automatalib.words.impl.ArrayAlphabet;
 import net.automatalib.words.impl.FastAlphabet;
-import net.automatalib.words.impl.Symbol;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class AutomataLearner {
 	public Automata getAutomata() {
@@ -64,34 +63,24 @@ public class AutomataLearner {
 	}
 
 	public static Automata init(Component component) {
-		MalerPnueliDFABuilder<Symbol> builder = new MalerPnueliDFABuilder<>();
+		MalerPnueliDFABuilder<Action> builder = new MalerPnueliDFABuilder<>();
 
-		ArrayList<String> interfaceAlphabet = new ArrayList<>();
-		interfaceAlphabet.addAll(ComponentTranslator.getInputInterfaceAlphabet(component));
-		interfaceAlphabet.addAll(ComponentTranslator.getOutputInterfaceAlphabet(component));
-		Alphabet<Symbol> alphabet = new FastAlphabet<>();
-		for (String word : interfaceAlphabet) {
-			alphabet.add(new Symbol(word));
-		}
-//		System.out.println(alphabet);
-//		alphabet.addAll(interfaceAlphabet);
-		MembershipOracle<Symbol, Boolean> membershipOracle = collection -> {
-			for (Query<Symbol, Boolean> query : collection) {
-				Word<Symbol> word = query.getInput();
-//				System.out.println(word);
-				query.answer(true);
-			}
-		};
+		ArrayList<Action> interfaceAlphabet = new ArrayList<>();
+		interfaceAlphabet.addAll(component.getInputAlphabet());
+		interfaceAlphabet.addAll(component.getOutputAlphabet());
+		Alphabet<Action> alphabet = new FastAlphabet<>();
+		alphabet.addAll(interfaceAlphabet);
+		StringOracle oracle = new StringOracle(component);
 		builder.setAlphabet(alphabet);
-		builder.setOracle(membershipOracle);
-		MalerPnueliDFA<Symbol> a = builder.create();
+		builder.setOracle(oracle);
+		MalerPnueliDFA<Action> a = builder.create();
 		a.startLearning();
-//        DFA<Integer, String> dfa = (DFA<Integer, String>) a.getHypothesisModel();
-//
-//        Collection<Integer> states = dfa.getStates();
-//        for (Integer state : states) {
-//            System.out.println(state);
-//        }
+        DFA<Integer, Action> dfa = (DFA<Integer, Action>) a.getHypothesisModel();
+
+        Collection<Integer> states = dfa.getStates();
+        for (Integer state : states) {
+            System.out.println(state);
+        }
 		return null;
 	}
 

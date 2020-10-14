@@ -6,12 +6,12 @@ import model.State;
 public class ParameterTranslator {
 	public static String translate(Parameter parameter) {
 		StringBuilder modelBuilder = new StringBuilder();
-		modelBuilder.append(
-				String.format(
-						"mtype:%s_states = {\n",
-						parameter.getName()
-				)
-		);
+//		modelBuilder.append(
+//				String.format(
+//						"mtype:%s_states = {\n",
+//						parameter.getName()
+//				)
+//		); TODO
 		for (State state : parameter.getStates()) {
 			modelBuilder.append(
 					String.format("\t%s,\n", state)
@@ -20,7 +20,7 @@ public class ParameterTranslator {
 		if (!parameter.getStates().isEmpty()) {
 			modelBuilder.delete(modelBuilder.length() - 2, modelBuilder.length());
 		}
-		modelBuilder.append("\n};\n\n");
+//		modelBuilder.append("\n};\n\n"); TODO
 		return modelBuilder.toString();
 	}
 }

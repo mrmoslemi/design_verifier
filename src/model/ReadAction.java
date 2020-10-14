@@ -14,11 +14,11 @@ public class ReadAction extends Action {
 	}
 
 	public String toString() {
-		return String.format(
-				"%s?%s;%s=%s;\n",
-				this.getChannel(), this.state,
-				this.getChannel().getParameter().getName(), this.state
-		);
+		return String.format("%s?%s", this.getChannel(), this.state);
+	}
+
+	public String getAssignment() {
+		return String.format("%s=%s", this.getChannel().getParameter().getName(), this.state);
 	}
 
 }

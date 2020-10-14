@@ -60,7 +60,7 @@ public class Guard {
 	@Override
 	public String toString() {
 		ArrayList<String> parameterGuards = new ArrayList<>();
-		String parameterName = this.parameter.getName().toLowerCase();
+		String parameterName = this.parameter.getName();
 		if (this.getState() != null) {
 			String stateGuard = parameterName + " == " + this.getState();
 			parameterGuards.add(stateGuard);

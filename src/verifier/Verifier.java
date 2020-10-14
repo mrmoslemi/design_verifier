@@ -4,12 +4,23 @@ import model.Component;
 import model.Model;
 import modelTranslator.ComponentTranslator;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class Verifier {
 
 	public static Result verify(Model model, Property property) {
 		Component component = model.getComponentByName("CONTROLLER");
 		String s = ComponentTranslator.translate(component);
-        System.out.println(s);
+		try {
+			FileWriter fileOutputStream = new FileWriter("test.pml");
+			fileOutputStream.write(s);
+			fileOutputStream.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		AutomataLearner.init(component);
 		return null;
 //        if (model.getComponents().isEmpty()) {
