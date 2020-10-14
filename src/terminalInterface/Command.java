@@ -53,14 +53,6 @@ public abstract class Command {
                         readCommand.options.put(Option.INPUT, arguments.get(1));
                         return readCommand;
                     }
-                case "translate":
-                    if (arguments.size() != 3) {
-                        return new InvalidCommand();
-                    } else {
-                        Command translateCommand = new TranslateCommand();
-                        translateCommand.options.put(Option.INPUT, arguments.get(1));
-                        return translateCommand;
-                    }
                 case "verify":
                     if (arguments.size() != 4) {
                         return new InvalidCommand();

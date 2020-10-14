@@ -29,7 +29,7 @@ public class Transition {
 			for (Guard guard : this.guards) {
 				toReturn.append(guard).append(" && ");
 			}
-			toReturn.delete(toReturn.length() - 7, toReturn.length());
+			toReturn.delete(toReturn.length() - 4, toReturn.length());
 		}
 		toReturn.append(")\n\t\t\t->\n\t\t\t");
 		for (Action action : this.effects) {

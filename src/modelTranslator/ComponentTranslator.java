@@ -6,51 +6,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ComponentTranslator {
-	private static HashMap<Component, String> translations;
-
-	static {
-		translations = new HashMap<>();
-	}
 
 	public static String translate(Component component) {
-		if (translations.containsKey(component)) {
-			return translations.get(component);
-		}
-		StringBuilder modelBuilder = new StringBuilder();
-		modelBuilder.append(
-				"mtype = {\n"
-		);
-		for (Parameter parameter : component.getParameters()) {
-			modelBuilder.append(ParameterTranslator.translate(parameter));
-			modelBuilder.append(",\n");
-		}
-		modelBuilder.delete(modelBuilder.length() - 2, modelBuilder.length());
-		modelBuilder.append("\n}\n\n");
-		for (Channel channel : component.getChannels()) {
-			modelBuilder.append(ChannelTranslator.translate(channel));
-		}
+		return translateParameters(component) +
+				translateChannels(component) +
+				translateInitials(component) +
+				translateProcess(component);
+	}
 
-
-		for (Parameter parameter : component.getParameters()) {
-			String parameterName = parameter.getName();
-//			String parameterTypedefName = parameterName + "_states"; TODO
-			String parameterTypedefName = "mtype";
-			modelBuilder.append(parameterTypedefName);
-			modelBuilder.append(" ");
-			modelBuilder.append(parameterName);
-			modelBuilder.append(";\n");
-			if (parameter.getValueRange() != null) {
-				String parameterNameValue = parameterName + "_value";
-				modelBuilder.append("int ");
-				modelBuilder.append(parameterNameValue);
-				modelBuilder.append(";\n");
-			}
-		}
-		modelBuilder.append("\n\nactive proctype ");
-
-		modelBuilder.append(component.getName());
-		modelBuilder.append(" (){\n");
-		modelBuilder.append("\tdo\n");
+	public static String translateProcess(Component component) {
 		ArrayList<ReadAction> readActions = component.getReadActions();
 		HashMap<ReadAction, ArrayList<Transition>> body = new HashMap<>();
 		ArrayList<Transition> noTriggers = new ArrayList<>();
@@ -63,40 +27,92 @@ public class ComponentTranslator {
 			} else {
 				noTriggers.add(transition);
 			}
-
 		}
+		StringBuilder processBody = new StringBuilder();
 		for (ReadAction readAction : readActions) {
-			modelBuilder.append("\n\n\t// TRIGGER\n");
-			modelBuilder.append("\t::\n\t\t");
-			modelBuilder.append(
+			processBody.append(
 					String.format(
-							"%s;%s;\n\n",
+							"\n\n\t// TRIGGER\n\t::\n\t\t%s;%s;\n\n",
 							readAction.toString(),
 							readAction.getAssignment()
 					)
 			);
 			ArrayList<Transition> transitions = body.get(readAction);
 			if (!transitions.isEmpty()) {
-				modelBuilder.append("\t\tif\n");
+				processBody.append("\t\tif\n");
 				for (Transition transition : transitions) {
-					modelBuilder.append("\t\t// TRANSITION ").append(transition.getId()).append("\n");
-					modelBuilder.append("\t\t::\n\t\t\t ").append(transition).append("\n");
+					processBody.append(String.format("\t\t// TRANSITION %s\n", transition.getId()));
+					processBody.append(
+							String.format(
+									"\t\t::\n\t\t\t%s\n\n",
+									transition
+							)
+					);
 				}
-				modelBuilder.append("\t\tfi;\n");
+				processBody.append("\t\tfi;\n");
 			}
 		}
-		modelBuilder.append("\t::if\n");
-		for (Transition transition : noTriggers) {
-			modelBuilder.append("\t// NO TRIG TRANSITION ").append(transition.getId()).append("\n");
-			modelBuilder.append("\t:: ").append(transition).append("\n");
+		if (!noTriggers.isEmpty()) {
+			StringBuilder noTriggersBody = new StringBuilder();
+			for (Transition transition : noTriggers) {
+				noTriggersBody.append(String.format("\t// NO TRIG TRANSITION %s\n", transition.getId()));
+				noTriggersBody.append(String.format("\t\t\t%s\n", transition));
+			}
+			processBody.append(String.format("\t::if\n%s\tfi;\n", noTriggersBody));
 		}
-		modelBuilder.append("\tfi;\n");
-		modelBuilder.append("\tod;\n");
-		modelBuilder.append("};\n\n");
-		modelBuilder.append(UniversalEnvironmentBuilder.buildFor(component));
-		translations.put(component, modelBuilder.toString());
-		return translate(component);
+
+		return String.format(
+				"\n\nactive proctype %s(){" +
+						"\n\tdo\n" +
+						"%s" +
+						"\tod;\n};\n\n",
+				component.getName(),
+				processBody
+		);
 	}
 
+	public static String translateParameters(Component component) {
+		StringBuilder modelBuilder = new StringBuilder();
+		for (Parameter parameter : component.getParameters()) {
+			for (State state : parameter.getStates()) {
+				modelBuilder.append(
+						String.format("\t%s,\n", state)
+				);
+			}
+		}
+		modelBuilder.delete(modelBuilder.length() - 2, modelBuilder.length());
+		return String.format(
+				"mtype = {\n%s\n};\n",
+				modelBuilder
+		);
+	}
 
+	public static String translateChannels(Component component) {
+		StringBuilder modelBuilder = new StringBuilder();
+		for (Channel channel : component.getChannels()) {
+			modelBuilder.append(ChannelTranslator.translate(channel));
+		}
+		return modelBuilder.toString();
+	}
+
+	public static String translateInitials(Component component) {
+		StringBuilder modelBuilder = new StringBuilder();
+		for (Parameter parameter : component.getParameters()) {
+			modelBuilder.append(
+					String.format(
+							"mtype %s;\n",
+							parameter.getName()
+					)
+			);
+			if (parameter.getValueRange() != null) {
+				modelBuilder.append(
+						String.format(
+								"int %s_value;\n",
+								parameter.getName()
+						)
+				);
+			}
+		}
+		return modelBuilder.toString();
+	}
 }
