@@ -1,8 +1,10 @@
 package modelReader.fileReaders;
 
 import model.*;
-import utils.*;
 import utils.Error;
+import utils.ErrorType;
+import utils.RegexChecker;
+import utils.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,21 +31,23 @@ public class TransitionFileReader {
 		ArrayList<String> header = sheetReader.header();
 		for (int i = 1; i < header.size(); i++) {
 			String cell = header.get(i);
-			boolean hasPre = false;
-			if (cell.startsWith("Pre_")) {
-				cell = cell.substring(4);
-				hasPre = true;
-			}
-			Parameter parameter = null;
-			for (Parameter parameter1 : parameters) {
-				if (parameter1.getName().equals(cell)) {
-					parameter = parameter1;
+			if (cell.length() > 0) {
+				boolean hasPre = false;
+				if (cell.startsWith("Pre_")) {
+					cell = cell.substring(4);
+					hasPre = true;
 				}
-			}
-			if (hasPre) {
-				guardColumns.put(parameter, i);
-			} else {
-				effectColumns.put(parameter, i);
+				Parameter parameter = null;
+				for (Parameter parameter1 : parameters) {
+					if (parameter1.getName().equals(cell)) {
+						parameter = parameter1;
+					}
+				}
+				if (hasPre) {
+					guardColumns.put(parameter, i);
+				} else {
+					effectColumns.put(parameter, i);
+				}
 			}
 		}
 	}

@@ -12,7 +12,7 @@ import java.io.IOException;
 public class Verifier {
 
 	public static Result verify(Model model, Property property) {
-		Component component = model.getComponentByName("CONTROLLER");
+		Component component = model.getComponentByName("USER");
 		String s = ComponentTranslator.translate(component);
 		try {
 			FileWriter fileOutputStream = new FileWriter("test.pml");

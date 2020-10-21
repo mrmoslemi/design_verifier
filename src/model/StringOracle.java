@@ -14,11 +14,10 @@ public class StringOracle implements MembershipOracle<Action, Boolean> {
 	public StringOracle(Component component) {
 		this.component = component;
 		this.oracle = collection -> {
-			System.out.println("BEFORE LOOPXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 			for (Query<Action, Boolean> query : collection) {
 				Word<Action> word = query.getInput();
 				String wordProcess = WordQueryTranslator.translate(word);
-				System.out.println(wordProcess);
+//				System.out.println(wordProcess);
 				query.answer(false);
 			}
 		};

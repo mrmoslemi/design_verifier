@@ -9,6 +9,7 @@ import modelReader.declaration.ParameterRange;
 import modelReader.declaration.ParameterState;
 import utils.Error;
 import utils.ErrorType;
+import utils.Log;
 import utils.RegexChecker;
 
 import java.io.File;
@@ -56,8 +57,11 @@ public class MergedIOReader {
 		ArrayList<ParameterInformation> parameterInformations = new ArrayList<>();
 		while (sheetReader.hasNext()) {
 			ArrayList<String> row = sheetReader.nextRow();
-			ParameterInformation parameterInformation = this.parseRow(row);
-			parameterInformations.add(parameterInformation);
+			if(row.get(0).length()>0){
+				ParameterInformation parameterInformation = this.parseRow(row);
+				parameterInformations.add(parameterInformation);
+			}
+
 		}
 		return parameterInformations;
 	}

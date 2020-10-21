@@ -1,1 +1,15 @@
-G(
+{select, info, pos, produce, take, another}
+(select,action.select_espresso,info)
+(select,action.select_americano,info)
+(select,action.select_latte,info)
+(select,action.select_mocha,info)
+(info, action.ok, pos)
+(info, action.cancel, select)
+(pos, pos_state.paid, produce)
+(pos, pos_state.failed, info)
+(produce, producer_state.take, take)
+(take, beeper.beep, take)
+(take, action.take, another)
+(another, action.ok, pos)
+(another, action.cancel, select)
+(another, another_timer.timeout, select)
