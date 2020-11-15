@@ -21,7 +21,6 @@ public class Transition {
 
 	@Override
 	public String toString() {
-
 		StringBuilder toReturn = new StringBuilder("(");
 		if (this.guards.isEmpty()) {
 			toReturn.append("true");

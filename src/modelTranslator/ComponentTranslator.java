@@ -49,7 +49,7 @@ public class ComponentTranslator {
 		if (!noTriggers.isEmpty()) {
 			for (Transition transition : noTriggers) {
 				processBody.append(String.format("\t// NO TRIG TRANSITION %s\n", transition.getId()));
-				processBody.append(String.format("\t:: %s\n", transition));
+				processBody.append(String.format("\t:: %s\n", transition.toString()));
 			}
 		}
 

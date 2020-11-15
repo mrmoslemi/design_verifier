@@ -3,6 +3,7 @@ package model;
 import modelTranslator.ComponentTranslator;
 import modelTranslator.PropertyTranslator;
 import net.automatalib.words.Word;
+import net.automatalib.words.WordBuilder;
 import utils.Pair;
 import verifier.Property;
 
@@ -56,7 +57,6 @@ public class OracleUtils {
 			caseCreator.write(modelCode);
 			caseCreator.flush();
 			caseCreator.close();
-//			Process process = Runtime.getRuntime().exec(String.format(" ./scripts/spin -run -DSAFETY %s", modelAddress));
 			Process process = Runtime.getRuntime().exec(String.format(" ./scripts/spinCheck.sh %s", fileName));
 			process.waitFor();
 			FileWriter outputFileWriter = new FileWriter(outputAddress);
@@ -85,7 +85,7 @@ public class OracleUtils {
 		}
 	}
 
-	public static String runCounterEx(String fileName) {
+	public static Word<Action> runCounterEx(String fileName,Set<Action> alphabetSet) {
 		try {
 			Process process = Runtime.getRuntime().exec(String.format(" ./scripts/counterexCheck.sh %s", fileName));
 			process.waitFor();
@@ -101,7 +101,22 @@ public class OracleUtils {
 					break;
 				}
 			}
-			return toReturn.toString();
+			ArrayList<Action> actions = new ArrayList<>();
+			String[] parts = toReturn.toString().split("\n");
+			for (String actionLine : parts) {
+				String[] actionParts = actionLine.split("_cin!");
+				String parameterName = actionParts[0];
+				String stateName = actionParts[1].substring(parameterName.length() + 1);
+				for (Action a : alphabetSet) {
+					if (a.getChannel().getParameter().getName().equals(parameterName) && ((WriteAction) a).getState().getName().equals(stateName)) {
+						actions.add(a);
+
+					}
+				}
+			}
+			WordBuilder<Action> wordBuilder = new WordBuilder<>();
+			wordBuilder.addAll(actions);
+			return wordBuilder.toWord();
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 			throw new IllegalStateException("done");

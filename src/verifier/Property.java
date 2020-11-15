@@ -1,6 +1,5 @@
 package verifier;
 
-import de.learnlib.algorithms.ttt.dfa.TTTStateDFA;
 import model.*;
 import net.automatalib.automata.fsa.DFA;
 import net.automatalib.automata.graphs.TransitionEdge;
@@ -70,59 +69,56 @@ public class Property {
 		return parameters;
 	}
 
-	public static Property fromDFA(DFA<TTTStateDFA<Integer>, Action> conjecture, Set<Action> alphabetSet) {
+	public static Property fromDFA(DFA<Integer, Action> conjecture, Set<Action> alphabetSet) {
 		HashMap<String, ArrayList<Edge>> graph = new HashMap<>();
 		ArrayList<String> states = new ArrayList<>();
 
-		UniversalGraph<TTTStateDFA<Integer>, TransitionEdge<Action, TTTStateDFA<Integer>>, Boolean, TransitionEdge.Property<Action, Void>> g =
+		UniversalGraph<Integer, TransitionEdge<Action, Integer>, Boolean, TransitionEdge.Property<Action, Void>> g =
 				conjecture.transitionGraphView(alphabetSet);
 		String initialState = "Q_" + conjecture.getInitialState();
 		String accept = null;
-		for (TTTStateDFA<Integer> state : conjecture.getStates()) {
+		for (Integer state : conjecture.getStates()) {
 			String stateName = "Q_" + state;
 			boolean isAccept = conjecture.isAccepting(state);
 			if (isAccept) {
 				accept = stateName;
-			}
-			if (stateName.equals(initialState)) {
-				states.add(0, stateName);
-			} else {
-				states.add(stateName);
+				if (stateName.equals(initialState)) {
+					states.add(0, stateName);
+				} else {
+					states.add(stateName);
+				}
 			}
 			graph.put(stateName, new ArrayList<>());
 		}
 		if (accept == null) {
 			accept = initialState;
 		}
-		for (TTTStateDFA<Integer> state : conjecture.getStates()) {
+		for (Integer state : conjecture.getStates()) {
 			String stateName = "Q_" + state;
-			for (TransitionEdge<Action, TTTStateDFA<Integer>> e : g.getOutgoingEdges(state)) {
-				String destination = "Q_" + e.getTransition();
-				State s = ((WriteAction) e.getInput()).getState();
-				Action readAction = e.getInput().getChannel().getReadActionByState(s);
-				Action writeAction = e.getInput().getChannel().getWriteActionByState(s);
-				Edge edge = new Edge();
-				edge.destination = destination;
-				edge.readAction = readAction;
-				edge.writeAction = writeAction;
-				ArrayList<Edge> edges = graph.get(stateName);
-				edges.add(edge);
-				graph.put(stateName, edges);
+			for (TransitionEdge<Action, Integer> e : g.getOutgoingEdges(state)) {
+				Integer destinationState = e.getTransition();
+				if (conjecture.isAccepting(destinationState)) {
+					String destination = "Q_" + destinationState;
+					State s = ((WriteAction) e.getInput()).getState();
+					Action readAction = e.getInput().getChannel().getReadActionByState(s);
+					Action writeAction = e.getInput().getChannel().getWriteActionByState(s);
+					Edge edge = new Edge();
+					edge.destination = destination;
+					edge.readAction = readAction;
+					edge.writeAction = writeAction;
+					ArrayList<Edge> edges = graph.get(stateName);
+					edges.add(edge);
+					graph.put(stateName, edges);
+				}
+
 			}
 		}
 		return new Property(graph, states, accept);
 	}
 
-	public boolean isAccept(String state) {
-		return this.accept.equals(state);
-	}
 
 	public String getName(String state) {
-		if (this.isAccept(state)) {
-			return "end";
-		} else {
-			return state;
-		}
+		return state;
 	}
 
 }

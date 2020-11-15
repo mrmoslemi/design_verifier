@@ -1,0 +1,144 @@
+mtype = {
+	posState_working,
+	posState_idle,
+	posState_failed,
+	posState_paid,
+	coffeeType_espresso,
+	coffeeType_americano,
+	coffeeType_latte,
+	coffeeType_mocha,
+	controllerState_select,
+	controllerState_pos,
+	controllerState_take,
+	controllerState_produce,
+	producerState_producing,
+	producerState_full,
+	producerState_empty,
+	action_take,
+	action_selectAmericano,
+	action_selectLatte,
+	action_selectMocha,
+	action_selectEspresso,
+	action_ok,
+	action_cancel
+};
+chan action_cin = [0] of {mtype};
+
+chan producerState_cin = [0] of {mtype};
+
+chan controllerState_cin = [0] of {mtype};
+
+chan controllerState_cout = [0] of {mtype};
+
+chan coffeeType_cin = [0] of {mtype};
+
+chan posState_cin = [0] of {mtype};
+
+chan coffeeType_cout = [0] of {mtype};
+
+mtype posState=posState_idle;
+mtype coffeeType=coffeeType_latte;
+mtype controllerState=controllerState_select;
+mtype producerState=producerState_empty;
+mtype action=action_ok;
+
+
+active proctype Controller(){
+	do
+	:: controllerState_cin?controllerState_select -> controllerState=controllerState_select;
+	:: controllerState_cin?controllerState_pos -> controllerState=controllerState_pos;
+	:: controllerState_cin?controllerState_take -> controllerState=controllerState_take;
+	:: controllerState_cin?controllerState_produce -> controllerState=controllerState_produce;
+	:: coffeeType_cin?coffeeType_espresso -> coffeeType=coffeeType_espresso;
+	:: coffeeType_cin?coffeeType_americano -> coffeeType=coffeeType_americano;
+	:: coffeeType_cin?coffeeType_latte -> coffeeType=coffeeType_latte;
+	:: coffeeType_cin?coffeeType_mocha -> coffeeType=coffeeType_mocha;
+	:: producerState_cin?producerState_producing -> producerState=producerState_producing;
+	:: producerState_cin?producerState_full -> producerState=producerState_full;
+		if
+		// TRANSITION CONTROLLER_SRS_9
+		:: ((controllerState == controllerState_produce) && (producerState == producerState_full)) -> controllerState_cout!controllerState_take; 
+		fi;
+	:: producerState_cin?producerState_empty -> producerState=producerState_empty;
+	:: posState_cin?posState_working -> posState=posState_working;
+	:: posState_cin?posState_idle -> posState=posState_idle;
+	:: posState_cin?posState_failed -> posState=posState_failed;
+		if
+		// TRANSITION CONTROLLER_SRS_8
+		:: ((posState == posState_failed) && (controllerState == controllerState_pos)) -> controllerState_cout!controllerState_select; 
+		fi;
+	:: posState_cin?posState_paid -> posState=posState_paid;
+		if
+		// TRANSITION CONTROLLER_SRS_7
+		:: ((posState == posState_paid) && (controllerState == controllerState_pos)) -> controllerState_cout!controllerState_produce; 
+		fi;
+	:: action_cin?action_take -> action=action_take;
+		if
+		// TRANSITION CONTROLLER_SRS_10
+		:: ((controllerState == controllerState_take) && (action == action_take)) -> controllerState_cout!controllerState_select; 
+		fi;
+	:: action_cin?action_selectAmericano -> action=action_selectAmericano;
+		if
+		// TRANSITION CONTROLLER_SRS_2
+		:: ((controllerState == controllerState_select) && (action == action_selectAmericano)) -> coffeeType_cout!coffeeType_americano; 
+		fi;
+	:: action_cin?action_selectLatte -> action=action_selectLatte;
+		if
+		// TRANSITION CONTROLLER_SRS_3
+		:: ((controllerState == controllerState_select) && (action == action_selectLatte)) -> coffeeType_cout!coffeeType_latte; 
+		fi;
+	:: action_cin?action_selectMocha -> action=action_selectMocha;
+		if
+		// TRANSITION CONTROLLER_SRS_4
+		:: ((controllerState == controllerState_select) && (action == action_selectMocha)) -> coffeeType_cout!coffeeType_mocha; 
+		fi;
+	:: action_cin?action_selectEspresso -> action=action_selectEspresso;
+		if
+		// TRANSITION CONTROLLER_SRS_1
+		:: ((controllerState == controllerState_select) && (action == action_selectEspresso)) -> coffeeType_cout!coffeeType_espresso; 
+		fi;
+	:: action_cin?action_ok -> action=action_ok;
+		if
+		// TRANSITION CONTROLLER_SRS_5
+		:: ((controllerState == controllerState_select) && (action == action_ok)) -> controllerState_cout!controllerState_pos; 
+		fi;
+	:: action_cin?action_cancel -> action=action_cancel;
+		if
+		// TRANSITION CONTROLLER_SRS_6
+		:: ((controllerState == controllerState_pos) && (action == action_cancel)) -> controllerState_cout!controllerState_select; 
+		fi;
+	od;
+};
+
+active proctype UniversalEnvironment(){
+do
+	::controllerState_cout?controllerState_take -> controllerState_cin!controllerState_take;
+	::coffeeType_cout?coffeeType_latte -> coffeeType_cin!coffeeType_latte;
+	::controllerState_cout?controllerState_select -> controllerState_cin!controllerState_select;
+	::coffeeType_cout?coffeeType_americano -> coffeeType_cin!coffeeType_americano;
+	::controllerState_cout?controllerState_pos -> controllerState_cin!controllerState_pos;
+	::controllerState_cout?controllerState_produce -> controllerState_cin!controllerState_produce;
+	::coffeeType_cout?coffeeType_espresso -> coffeeType_cin!coffeeType_espresso;
+	::coffeeType_cout?coffeeType_mocha -> coffeeType_cin!coffeeType_mocha;
+od;
+}
+trace{
+	Q_0: if
+		::action_cin?action_selectLatte -> goto Q_0;
+		::action_cin?action_selectAmericano -> goto Q_0;
+		::controllerState_cin?controllerState_pos -> goto Q_0;
+		::controllerState_cin?controllerState_select -> goto Q_0;
+		::controllerState_cin?controllerState_produce -> goto Q_0;
+		::action_cin?action_selectMocha -> goto Q_0;
+		::action_cin?action_ok -> goto Q_0;
+		::controllerState_cin?controllerState_take -> goto Q_0;
+		::action_cin?action_selectEspresso -> goto Q_0;
+		::action_cin?action_take -> goto Q_0;
+		::action_cin?action_cancel -> goto Q_0;
+	fi;
+
+}
+active proctype word(){
+	action_cin!action_selectEspresso;
+
+}

@@ -1,0 +1,111 @@
+mtype = {
+	produceTimer_timeout,
+	produceTimer_running,
+	controllerState_select,
+	controllerState_pos,
+	controllerState_take,
+	controllerState_produce,
+	action_take,
+	action_selectAmericano,
+	action_selectLatte,
+	action_selectMocha,
+	action_selectEspresso,
+	action_ok,
+	action_cancel,
+	doorLock_lock,
+	doorLock_unlock
+};
+chan action_cin = [0] of {mtype};
+
+chan produceTimer_cin = [0] of {mtype};
+
+chan controllerState_cin = [0] of {mtype};
+
+chan doorLock_cin = [0] of {mtype};
+
+chan action_cout = [0] of {mtype};
+
+mtype produceTimer=produceTimer_timeout;
+int produceTimer_value=0;
+mtype controllerState=controllerState_select;
+mtype action=action_ok;
+mtype doorLock=doorLock_lock;
+
+
+active proctype User(){
+	do
+	:: controllerState_cin?controllerState_select -> controllerState=controllerState_select;
+		if
+		// TRANSITION USER_SRS_1
+		:: ((controllerState == controllerState_select)) -> action_cout!action_selectEspresso; 
+		// TRANSITION USER_SRS_2
+		:: ((controllerState == controllerState_select)) -> action_cout!action_selectAmericano; 
+		// TRANSITION USER_SRS_3
+		:: ((controllerState == controllerState_select)) -> action_cout!action_selectLatte; 
+		// TRANSITION USER_SRS_4
+		:: ((controllerState == controllerState_select)) -> action_cout!action_selectMocha; 
+		// TRANSITION USER_SRS_5
+		:: ((controllerState == controllerState_select)) -> action_cout!action_ok; 
+		fi;
+	:: controllerState_cin?controllerState_pos -> controllerState=controllerState_pos;
+		if
+		// TRANSITION USER_SRS_6
+		:: ((controllerState == controllerState_pos)) -> action_cout!action_cancel; 
+		fi;
+	:: controllerState_cin?controllerState_take -> controllerState=controllerState_take;
+		if
+		// TRANSITION USER_SRS_7
+		:: ((controllerState == controllerState_take)) -> action_cout!action_take; 
+		fi;
+	:: controllerState_cin?controllerState_produce -> controllerState=controllerState_produce;
+	:: action_cin?action_take -> action=action_take;
+	:: action_cin?action_selectAmericano -> action=action_selectAmericano;
+	:: action_cin?action_selectLatte -> action=action_selectLatte;
+	:: action_cin?action_selectMocha -> action=action_selectMocha;
+	:: action_cin?action_selectEspresso -> action=action_selectEspresso;
+	:: action_cin?action_ok -> action=action_ok;
+	:: action_cin?action_cancel -> action=action_cancel;
+	od;
+};
+
+active proctype UniversalEnvironment(){
+do
+	::action_cout?action_ok -> action_cin!action_ok;
+	::action_cout?action_take -> action_cin!action_take;
+	::action_cout?action_cancel -> action_cin!action_cancel;
+	::action_cout?action_selectLatte -> action_cin!action_selectLatte;
+	::action_cout?action_selectEspresso -> action_cin!action_selectEspresso;
+	::action_cout?action_selectAmericano -> action_cin!action_selectAmericano;
+	::action_cout?action_selectMocha -> action_cin!action_selectMocha;
+od;
+}
+trace{
+	Q0: if
+		::doorLock_cin?doorLock_lock -> goto Q0;
+		::produceTimer_cin?produceTimer_timeout -> goto Q1;
+		::doorLock_cin?doorLock_unlock -> goto Q2;
+	fi;
+	Q1: if
+		::doorLock_cin?doorLock_unlock -> goto Q2;
+	fi;
+	Q2: if
+		::doorLock_cin?doorLock_lock -> goto Q0;
+		::doorLock_cin?doorLock_unlock -> goto Q2;
+	fi;
+	Q3:
+}
+active proctype word(){
+	doorLock_cin!doorLock_unlock;
+	controllerState_cin!controllerState_take;
+	doorLock_cin!doorLock_lock;
+	produceTimer_cin!produceTimer_timeout;
+	produceTimer_cin!produceTimer_timeout;
+	produceTimer_cin!produceTimer_timeout;
+
+}
+active proctype UnmatchedActions(){end: do
+	:: doorLock_cin?doorLock_unlock;
+	:: doorLock_cin?doorLock_lock;
+	:: produceTimer_cin?produceTimer_timeout;
+od;
+}

@@ -32,10 +32,12 @@ public abstract class Command {
 		} else {
 			String commandString = arguments.get(0).toLowerCase();
 			if ("verify".equals(commandString)) {
-				if (arguments.size() != 3) {
-					return new InvalidCommand();
+				if (arguments.size() == 3) {
+					return new VerifyCommand(arguments.get(1), arguments.get(2), "max");
+				} else if (arguments.size() == 4) {
+					return new VerifyCommand(arguments.get(1), arguments.get(2),arguments.get(3));
 				} else {
-					return new VerifyCommand(arguments.get(1), arguments.get(2));
+					return new InvalidCommand();
 				}
 			}
 			return new InvalidCommand();

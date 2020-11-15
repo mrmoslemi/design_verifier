@@ -6,6 +6,7 @@ import modelTranslator.WordQueryTranslator;
 import net.automatalib.words.Word;
 import utils.Log;
 import utils.Pair;
+import verifier.AssumptionLearner;
 import verifier.Property;
 
 import java.util.Collection;
@@ -14,10 +15,12 @@ public class StringOracle implements MembershipOracle<Action, Boolean> {
 	private String base;
 	private Component component;
 	private int round;
+	private AssumptionLearner assumptionLearner;
 
-	public StringOracle(Component component, Property property) {
+	public StringOracle(Component component, Property property, AssumptionLearner assumptionLearner) {
 		this.component = component;
 		round = 0;
+		this.assumptionLearner = assumptionLearner;
 		this.base = OracleUtils.getBase(component, property);
 
 	}
@@ -26,6 +29,7 @@ public class StringOracle implements MembershipOracle<Action, Boolean> {
 	public void processQueries(Collection collection) {
 		int i = 0;
 		round++;
+		assumptionLearner.addMembershipCount(collection.size());
 		for (Object queryObject : collection) {
 			i++;
 			Query<Action, Boolean> query = (Query<Action, Boolean>) queryObject;
@@ -34,18 +38,6 @@ public class StringOracle implements MembershipOracle<Action, Boolean> {
 			String unmatchedFromWord = WordQueryTranslator.getUnmatchedActionsProcess(word.asList(), component.getReadOnlyAlphabet());
 			Pair<Boolean, String> result = OracleUtils.runSpin(getQueryId(i), base + wordProcess + unmatchedFromWord);
 			query.answer(result.first);
-			StringBuilder wordCompact = new StringBuilder();
-			for (Action action : word) {
-				wordCompact.append(action.getChannel().getParameter().getName()).append(".").append(((WriteAction) action).getState().getName()).append(", ");
-			}
-			if (wordCompact.length() > 0) {
-				wordCompact.setLength(wordCompact.length() - 2);
-			}
-			if (result.first) {
-				Log.success(getQueryId(i) + "\ttrue\t" + result.second + "\t" + wordCompact);
-			} else {
-				Log.info(getQueryId(i) + "\tfalse\t" + result.second + "\t" + wordCompact);
-			}
 		}
 	}
 
