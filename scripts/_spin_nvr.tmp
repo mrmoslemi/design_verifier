@@ -1,9 +1,0 @@
-never p2 {    /* !([] (0)) */
-T0_init:
-	do
-	:: atomic { (! ((0))) -> assert(!(! ((0)))) }
-	:: (1) -> goto T0_init
-	od;
-accept_all:
-	skip
-}

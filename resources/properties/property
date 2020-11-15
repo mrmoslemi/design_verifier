@@ -1,0 +1,12 @@
+select, info, pos, produce, take, another
+select, Controller_State.Info, info
+info, Action.OK, pos
+info, Action.Cancel, select
+pos, POS_State.Paid, produce
+pos, POS_State.Failed, info
+produce, Produce_Timer.Timeout, take
+take, Beeper.Beep, take
+take, Action.Take, another
+another, Action.OK, pos
+another, Action.Cancel, select
+another, Another_Timer.Timeout, select

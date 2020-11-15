@@ -14,23 +14,23 @@ public class Log {
     public static final String ANSI_WHITE = "\u001B[37m";
 
     public static void info(@NotNull String message) {
-        Log.log(ANSI_CYAN, "INFO", message);
+        Log.log(ANSI_CYAN, "INFO\t", message);
     }
 
     public static void info(@NotNull Object message) {
-        Log.log(ANSI_CYAN, "INFO", message.toString());
+        Log.log(ANSI_CYAN, "INFO\t", message.toString());
     }
 
     public static void success(@NotNull String message) {
-        Log.log(ANSI_GREEN, "SUCCESS", message);
+        Log.log(ANSI_GREEN, "SUCCESS\t", message);
     }
 
     public static void error(@NotNull String message) {
-        Log.log(ANSI_RED, "ERROR", message);
+        Log.log(ANSI_RED, "ERROR\t", message);
     }
 
     public static void warning(@NotNull String message) {
-        Log.log(ANSI_YELLOW, "WARNING", message);
+        Log.log(ANSI_YELLOW, "WARNING\t", message);
     }
 
     private static void log(@NotNull String color, @NotNull String prefix, @NotNull String message) {

@@ -76,6 +76,16 @@ public class Channel {
 		}
 		return null;
 	}
+	public Action getWriteActionByState(State state) {
+		for (Action action : this.getWriteActions()) {
+			if (action instanceof WriteAction) {
+				if (((WriteAction) action).getState().equals(state)) {
+					return action;
+				}
+			}
+		}
+		return null;
+	}
 
 	@Override
 	public String toString() {

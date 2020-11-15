@@ -55,28 +55,33 @@ public class Component {
 		return this.transitions;
 	}
 
-	public ArrayList<Channel> getChannels() {
-		ArrayList<Channel> channels = new ArrayList<>(this.getInputChannels());
+	public ArrayList<Channel> getAllChannels() {
+		ArrayList<Channel> channels = new ArrayList<>(this.getAllInputChannels());
 		channels.addAll(this.getOutputChannels());
 		return channels;
 	}
 
-	public ArrayList<Channel> getInputChannels() {
+	public ArrayList<Channel> getAllInputChannels() {
 		ArrayList<Channel> toReturn = new ArrayList<>();
 		for (Parameter parameter : this.parameters) {
 			toReturn.add(parameter.getInputChannel());
 		}
 		return toReturn;
 	}
-
-	public Channel getInputChannel(Parameter parameter) {
-		ArrayList<Channel> inputChannels = this.getInputChannels();
-		for (Channel channel : inputChannels) {
-			if (channel.getParameter().equals(parameter)) {
-				return channel;
-			}
+	public ArrayList<Channel> getFeedbackChannels() {
+		ArrayList<Channel> toReturn = new ArrayList<>();
+		for (Parameter parameter : this.outputParameters) {
+			toReturn.add(parameter.getInputChannel());
 		}
-		return null;
+		return toReturn;
+	}
+
+	public ArrayList<Channel> getReadonlyChannels() {
+		ArrayList<Channel> toReturn = new ArrayList<>();
+		for (Parameter parameter : this.inputParameters) {
+			toReturn.add(parameter.getInputChannel());
+		}
+		return toReturn;
 	}
 
 	public ArrayList<Channel> getOutputChannels() {
@@ -87,27 +92,32 @@ public class Component {
 		return toReturn;
 	}
 
-	public Channel getOutputChannel(Parameter parameter) {
-		ArrayList<Channel> outputChannels = this.getOutputChannels();
-		for (Channel channel : outputChannels) {
-			if (channel.getParameter().equals(parameter)) {
-				return channel;
-			}
-		}
-		return null;
-	}
-
-	public ArrayList<ReadAction> getReadActions() {
+	public ArrayList<ReadAction> getAllReadActions() {
 		ArrayList<ReadAction> actions = new ArrayList<>();
-		for (Channel channel : this.getInputChannels()) {
+		for (Channel channel : this.getAllInputChannels()) {
 			actions.addAll(channel.getReadActions());
 		}
 		return actions;
 	}
-
-	public ArrayList<Action> getInputAlphabet() {
+	public ArrayList<Action> getReadOnlyAlphabet() {
 		ArrayList<Action> actions = new ArrayList<>();
-		for (Channel channel : this.getInputChannels()) {
+		for (Channel channel : this.getReadonlyChannels()) {
+			actions.addAll(channel.getWriteActions());
+		}
+		return actions;
+	}
+	public ArrayList<WriteAction> getEnvironmentActions() {
+		ArrayList<WriteAction> actions = new ArrayList<>();
+		for (Channel channel : this.getReadonlyChannels()) {
+			actions.addAll(channel.getWriteActions());
+		}
+		return actions;
+	}
+
+
+	public ArrayList<Action> getFeedbackActions() {
+		ArrayList<Action> actions = new ArrayList<>();
+		for (Channel channel : this.getFeedbackChannels()) {
 			actions.addAll(channel.getWriteActions());
 		}
 		return actions;

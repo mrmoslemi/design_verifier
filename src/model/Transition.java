@@ -31,7 +31,7 @@ public class Transition {
 			}
 			toReturn.delete(toReturn.length() - 4, toReturn.length());
 		}
-		toReturn.append(")\n\t\t\t->\n\t\t\t");
+		toReturn.append(") -> ");
 		for (Action action : this.effects) {
 			toReturn.append(action).append(" ");
 		}

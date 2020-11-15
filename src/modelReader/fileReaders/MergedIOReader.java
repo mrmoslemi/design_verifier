@@ -83,7 +83,13 @@ public class MergedIOReader {
 		String name = row.get(0);
 		String initialString = row.get(2);
 		//TODO fix me
-		Evaluation initial = new Evaluation(new State(null, "a"), 1);
+		Evaluation initial;
+		if(RegexChecker.isMember(initialString)){
+			initial = new Evaluation(new State(null, initialString.substring(2)), null);
+		}else {
+			String[] parts = initialString.split(", ");
+			initial = new Evaluation(new State(null,parts[0].substring(2)),Integer.parseInt(parts[1].substring(2)));
+		}
 		String[] componentNames = row.get(3).split("\n");
 		String owner = row.get(4);
 		ArrayList<String> componentsNamesArrayList = new ArrayList<>(Arrays.asList(componentNames));

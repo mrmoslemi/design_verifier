@@ -1,27 +1,38 @@
 package verifier;
 
-import model.Component;
-import model.Model;
-import modelTranslator.ComponentTranslator;
+import model.*;
+import utils.Pair;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.ArrayList;
 
 public class Verifier {
 
 	public static Result verify(Model model, Property property) {
-		Component component = model.getComponentByName("USER");
-		String s = ComponentTranslator.translate(component);
-		try {
-			FileWriter fileOutputStream = new FileWriter("test.pml");
-			fileOutputStream.write(s);
-			fileOutputStream.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
+		ArrayList<Component> remainingComponents = new ArrayList<>(model.getComponents());
+		Property currentProperty = property;
+		while (!remainingComponents.isEmpty()) {
+			Component currentComponent = selectComponent(remainingComponents, currentProperty);
+			ConjectureOracle conjectureOracle = new ConjectureOracle(currentComponent, currentProperty);
+			AutomataLearner.init(currentComponent, currentProperty);
+			do {
+				Property conjecture = AutomataLearner.getConjecture();
+				Pair<Boolean, String> result = conjectureOracle.processConjecture(conjecture);
+				if (result.first) {
+					remainingComponents.remove(currentComponent);
+					currentProperty = conjecture;
+					break;
+				} else {
+					AutomataLearner.addCounterExample(result.second, model);
+				}
+			} while (true);
+
+			//TODO check <candidateAssumption> component <currentProperty>
+//			if (true) {
+//			} else {
+//				//TODO extend
+//			}
 		}
-		AutomataLearner.init(component);
+
 		return null;
 //        if (model.getComponents().isEmpty()) {
 //            return ModelChecker.check(null, property);
@@ -52,5 +63,9 @@ public class Verifier {
 //            }
 //        }
 
+	}
+
+	public static Component selectComponent(ArrayList<Component> components, Property property) {
+		return components.get(0);
 	}
 }

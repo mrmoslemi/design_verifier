@@ -1,10 +1,8 @@
 package modelReader.fileReaders;
 
 import model.*;
+import utils.*;
 import utils.Error;
-import utils.ErrorType;
-import utils.RegexChecker;
-import utils.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,7 +14,7 @@ public class TransitionFileReader {
 	private static HashMap<Parameter, Integer> effectColumns;
 	private static SheetReader sheetReader;
 
-	public static void read(File source, Component destination) {
+	public static void read(File source, Component destination, HashMap<String, Parameter> parameters) {
 		guardColumns = new HashMap<>();
 		effectColumns = new HashMap<>();
 		sheetReader = new SheetReader(source.getAbsolutePath());
@@ -29,9 +27,10 @@ public class TransitionFileReader {
 	private static void readHeader(Component destination) {
 		ArrayList<Parameter> parameters = destination.getParameters();
 		ArrayList<String> header = sheetReader.header();
+
 		for (int i = 1; i < header.size(); i++) {
 			String cell = header.get(i);
-			if (cell.length() > 0) {
+			if (!cell.isBlank()) {
 				boolean hasPre = false;
 				if (cell.startsWith("Pre_")) {
 					cell = cell.substring(4);
@@ -54,6 +53,9 @@ public class TransitionFileReader {
 
 	private static void readTransition(Component destination) {
 		ArrayList<String> row = sheetReader.nextRow();
+		if(row.get(0).isBlank()){
+			return;
+		}
 		ReadAction trigger = null;
 		ArrayList<Guard> guards = new ArrayList<>();
 		ArrayList<Action> effects = new ArrayList<>();

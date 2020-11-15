@@ -10,6 +10,7 @@ import modelReader.declaration.ParameterState;
 import modelReader.fileReaders.MergedIOReader;
 import modelReader.fileReaders.TransitionFileReader;
 import utils.Log;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,13 +18,11 @@ import java.util.HashMap;
 public class ModelReader {
 	private String mainFolderAddress;
 	private File mergedIOFile;
-	private ArrayList<File> transitionsFiles;
 	private ArrayList<File> componentFolders;
 	private Model model;
 
 	public ModelReader(String mainFolderAddress) {
 		this.mainFolderAddress = mainFolderAddress;
-		this.transitionsFiles = new ArrayList<>();
 		this.componentFolders = new ArrayList<>();
 		this.validateSubFolders();
 
@@ -55,7 +54,6 @@ public class ModelReader {
 
 					}
 				}
-
 			}
 			if (information instanceof ParameterRange) {
 				parameter.setValueRange(((ParameterRange) information).getValueRange());
@@ -63,8 +61,8 @@ public class ModelReader {
 			if (information instanceof ParameterState) {
 				parameter.addState(((ParameterState) information).getState());
 			}
-
 		}
+
 
 		for (File componentFolder : this.componentFolders) {
 			Component component = components.get(componentFolder.getName());
@@ -72,24 +70,10 @@ public class ModelReader {
 			assert requirementsFiles != null;
 			for (File requirementsFile : requirementsFiles) {
 				if (requirementsFile.getName().endsWith(".xlsx")) {
-					TransitionFileReader.read(requirementsFile, component);
+					TransitionFileReader.read(requirementsFile, component,parameters);
 				}
 			}
 		}
-		for (File transitionFile : this.transitionsFiles) {
-			String name = transitionFile.getName();
-			name = name.substring(0, name.indexOf(".xlsx"));
-			Parameter parameter = parameters.get(name);
-			Component component = null;
-			for (Component c : components.values()) {
-				if (c.getOutputParameters().contains(parameter)) {
-					component = c;
-				}
-			}
-			assert component != null;
-			TransitionFileReader.read(transitionFile, component);
-		}
-
 		this.model = new Model();
 		for (Component component : components.values()) {
 			model.addComponent(component);
@@ -127,24 +111,9 @@ public class ModelReader {
 			if (!file.isDirectory() && file.getName().equals("merged_io.xlsx")) {
 				this.mergedIOFile = file;
 			}
-			if (file.isDirectory() && file.getName().equals("transitions")) {
-				transitionsFolder = file;
-			}
 		}
 		if (this.mergedIOFile == null) {
 			throw new IllegalStateException("no merged_io.xlsx file found under all_modules");
-		}
-		if (transitionsFolder == null) {
-			throw new IllegalStateException("no transitions folder found under all_modules");
-		}
-		File[] transitionFiles = transitionsFolder.listFiles();
-		assert transitionFiles != null;
-		for (File transitionFile : transitionFiles) {
-			if (transitionFile.isDirectory() || !transitionFile.getName().endsWith(".xlsx")) {
-				Log.warning("Unused file " + transitionFile.getName());
-			} else {
-				this.transitionsFiles.add(transitionFile);
-			}
 		}
 	}
 

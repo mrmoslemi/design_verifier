@@ -4,18 +4,12 @@ import model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 public class ComponentTranslator {
 
 	public static String translate(Component component) {
-		return translateParameters(component) +
-				translateChannels(component) +
-				translateInitials(component) +
-				translateProcess(component);
-	}
-
-	public static String translateProcess(Component component) {
-		ArrayList<ReadAction> readActions = component.getReadActions();
+		ArrayList<ReadAction> readActions = component.getAllReadActions();
 		HashMap<ReadAction, ArrayList<Transition>> body = new HashMap<>();
 		ArrayList<Transition> noTriggers = new ArrayList<>();
 		for (ReadAction action : readActions) {
@@ -32,7 +26,7 @@ public class ComponentTranslator {
 		for (ReadAction readAction : readActions) {
 			processBody.append(
 					String.format(
-							"\n\n\t// TRIGGER\n\t::\n\t\t%s;%s;\n\n",
+							"\t:: %s -> %s;\n",
 							readAction.toString(),
 							readAction.getAssignment()
 					)
@@ -44,7 +38,7 @@ public class ComponentTranslator {
 					processBody.append(String.format("\t\t// TRANSITION %s\n", transition.getId()));
 					processBody.append(
 							String.format(
-									"\t\t::\n\t\t\t%s\n\n",
+									"\t\t:: %s\n",
 									transition
 							)
 					);
@@ -53,12 +47,10 @@ public class ComponentTranslator {
 			}
 		}
 		if (!noTriggers.isEmpty()) {
-			StringBuilder noTriggersBody = new StringBuilder();
 			for (Transition transition : noTriggers) {
-				noTriggersBody.append(String.format("\t// NO TRIG TRANSITION %s\n", transition.getId()));
-				noTriggersBody.append(String.format("\t\t\t%s\n", transition));
+				processBody.append(String.format("\t// NO TRIG TRANSITION %s\n", transition.getId()));
+				processBody.append(String.format("\t:: %s\n", transition));
 			}
-			processBody.append(String.format("\t::if\n%s\tfi;\n", noTriggersBody));
 		}
 
 		return String.format(
@@ -71,9 +63,9 @@ public class ComponentTranslator {
 		);
 	}
 
-	public static String translateParameters(Component component) {
+	public static String translateParameters(Set<Parameter> parameters) {
 		StringBuilder modelBuilder = new StringBuilder();
-		for (Parameter parameter : component.getParameters()) {
+		for (Parameter parameter : parameters) {
 			for (State state : parameter.getStates()) {
 				modelBuilder.append(
 						String.format("\t%s,\n", state)
@@ -87,28 +79,30 @@ public class ComponentTranslator {
 		);
 	}
 
-	public static String translateChannels(Component component) {
+	public static String translateChannels(Set<Channel> channels) {
 		StringBuilder modelBuilder = new StringBuilder();
-		for (Channel channel : component.getChannels()) {
+		for (Channel channel : channels) {
 			modelBuilder.append(ChannelTranslator.translate(channel));
 		}
 		return modelBuilder.toString();
 	}
 
-	public static String translateInitials(Component component) {
+	public static String translateInitials(Set<Parameter> parameters) {
 		StringBuilder modelBuilder = new StringBuilder();
-		for (Parameter parameter : component.getParameters()) {
+		for (Parameter parameter : parameters) {
 			modelBuilder.append(
 					String.format(
-							"mtype %s;\n",
-							parameter.getName()
+							"mtype %s=%s;\n",
+							parameter.getName(),
+							parameter.getName() + "_" + parameter.getInitial().getState().getName()
 					)
 			);
 			if (parameter.getValueRange() != null) {
 				modelBuilder.append(
 						String.format(
-								"int %s_value;\n",
-								parameter.getName()
+								"int %s_value=%s;\n",
+								parameter.getName(),
+								parameter.getInitial().getValue()
 						)
 				);
 			}
