@@ -1,0 +1,7 @@
+Q0, Q1, Q2, Q3, Q4
+Q0, controllerState.pos, Q1
+Q1, controllerState.select, Q0
+Q1, controllerState.produce, Q2
+Q2, produceTimer.timeout, Q3
+Q3, controllerState.take, Q4
+Q4, controllerState.select, Q0

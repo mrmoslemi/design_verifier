@@ -8,13 +8,28 @@ import model.State;
 import verifier.Edge;
 import verifier.Property;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class PropertyReader {
+	public static List<Property> readFolder(String folderAddress, Model model) {
+		ArrayList<Property> properties = new ArrayList<>();
+		File folder = new File(folderAddress);
+		if (folder.isDirectory()) {
+			File[] files = folder.listFiles();
+			assert files != null;
+			for (File file : files) {
+				Property property = read(folderAddress+file.getName(),model);
+				properties.add(property);
+			}
+		}
+		return properties;
+	}
 
 	public static Property read(String propertyAddress, Model model) {
 		HashMap<String, ArrayList<Edge>> graph = new HashMap<>();
@@ -50,7 +65,7 @@ public class PropertyReader {
 				edges.add(edge);
 				graph.put(source, edges);
 			}
-			return new Property(graph, states,states.get(0));
+			return new Property(propertyAddress,graph, states);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;

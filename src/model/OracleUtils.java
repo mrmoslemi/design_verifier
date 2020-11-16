@@ -51,7 +51,6 @@ public class OracleUtils {
 
 	public static Pair<Boolean, String> runSpin(String fileName, String modelCode) {
 		String modelAddress = String.format("output/cases/%s", fileName);
-		String outputAddress = String.format("output/results/%s", fileName);
 		try {
 			FileWriter caseCreator = new FileWriter(modelAddress);
 			caseCreator.write(modelCode);
@@ -59,7 +58,6 @@ public class OracleUtils {
 			caseCreator.close();
 			Process process = Runtime.getRuntime().exec(String.format(" ./scripts/spinCheck.sh %s", fileName));
 			process.waitFor();
-			FileWriter outputFileWriter = new FileWriter(outputAddress);
 			Scanner scanner = new Scanner(process.getInputStream());
 
 			String answerString = scanner.nextLine();
@@ -75,9 +73,6 @@ public class OracleUtils {
 			} else {
 				answer = true;
 			}
-			outputFileWriter.write(answer + ":\t" + answerString);
-			outputFileWriter.flush();
-			outputFileWriter.close();
 			return new Pair<>(answer, answerString);
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();

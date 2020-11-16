@@ -1,0 +1,8 @@
+Q0, Q1
+Q0, action.selectEspresso, Q0
+Q0, action.selectAmericano, Q0
+Q0, action.selectMocha, Q0
+Q0, action.selectLatte, Q0
+Q0, action.ok, Q1
+Q1, action.ok, Q1
+Q1, action.take, Q0

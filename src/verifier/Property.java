@@ -13,12 +13,12 @@ import java.util.Set;
 public class Property {
 	private HashMap<String, ArrayList<Edge>> graph;
 	private ArrayList<String> states;
-	private String accept;
+	private String name;
 
-	public Property(HashMap<String, ArrayList<Edge>> graph, ArrayList<String> states, String accept) {
+	public Property(String name, HashMap<String, ArrayList<Edge>> graph, ArrayList<String> states) {
+		this.name = name;
 		this.graph = graph;
 		this.states = states;
-		this.accept = accept;
 	}
 
 	public HashMap<String, ArrayList<Edge>> getGraph() {
@@ -113,7 +113,7 @@ public class Property {
 
 			}
 		}
-		return new Property(graph, states, accept);
+		return new Property("Conjecture", graph, states);
 	}
 
 
@@ -121,4 +121,7 @@ public class Property {
 		return state;
 	}
 
+	public String getName() {
+		return name;
+	}
 }

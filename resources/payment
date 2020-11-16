@@ -1,0 +1,24 @@
+Q0, Q1, Q2, Q3
+Q0, action.selectAmericano, Q1
+Q0, action.selectEspresso, Q1
+Q0, action.selectMocha, Q1
+Q0, action.selectLatte, Q1
+Q0, action.take, Q0
+Q0, action.cancel, Q0
+Q0, action.ok, Q0
+Q1, action.ok, Q2
+Q1, action.cancel, Q0
+Q1, action.selectAmericano, Q1
+Q1, action.selectEspresso, Q1
+Q1, action.selectMocha, Q1
+Q1, action.selectLatte, Q1
+Q1, action.take, Q1
+Q2, posState.paid, Q3
+Q2, posState.failed, Q1
+Q3, action.take, Q0
+Q3, action.selectAmericano, Q3
+Q3, action.selectEspresso, Q3
+Q3, action.selectMocha, Q3
+Q3, action.selectLatte, Q3
+Q3, action.cancel, Q3
+Q3, action.ok, Q3

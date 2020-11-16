@@ -1,0 +1,5 @@
+Q0, Q1, Q2, Q3
+Q0, posState.working, Q1
+Q1, posState.paid, Q3
+Q2, posState.failed, Q0
+Q3, produceTimer.timeout, Q0

@@ -1,9 +1,0 @@
-select, pos, take
-select, Action.Select_Espresso, pos
-select, Action.Select_Americano, pos
-select, Action.Select_Latte, pos
-select, Action.Select_Mocha, pos
-pos, POS_State.Paid, take
-pos, POS_State.Failed, select
-take, Beeper.Beep, take
-take, Action.Take, select
